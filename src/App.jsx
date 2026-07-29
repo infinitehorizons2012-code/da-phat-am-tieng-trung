@@ -1,24 +1,62 @@
 import React from 'react';
 import PinyinTable from './components/PinyinTable';
+import { Volume2, Play } from 'lucide-react';
 
 function App() {
   return (
-    <div className="container">
-      <header className="animate-fade-in">
-        <h1>Bảng Pinyin Tiếng Trung</h1>
-        <p className="subtitle">
-          Bảng tổng hợp 405 âm tiết tiếng Trung giúp bạn luyện phát âm chuẩn. <br />
-          Bấm vào từng âm tiết để nghe phát âm thanh điệu (chuẩn giọng đọc bản xứ qua TTS).
-        </p>
-      </header>
-      
-      <main>
-        <PinyinTable />
-      </main>
+    <div className="flex bg-slate-50 font-sans text-slate-800 h-screen w-full">
+      <div className="flex-1 w-full grid h-dvh min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden pb-0">
+        
+        {/* Header */}
+        <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded bg-rose-500 text-white flex items-center justify-center font-bold shadow-sm">
+              拼
+            </div>
+            <div>
+              <h1 className="font-black text-slate-800 text-lg md:text-xl tracking-tight leading-none">Bảng Pinyin</h1>
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-0.5">Bảng ghép pinyin tiếng Trung</div>
+            </div>
+          </div>
+        </div>
 
-      <footer style={{ marginTop: '3rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-        <p>© 2026 Bảng Pinyin Tiếng Trung. Dự án mã nguồn mở.</p>
-      </footer>
+        {/* Main Content */}
+        <main className="min-h-0 flex flex-col w-full mx-auto max-w-none overflow-hidden animate-in fade-in duration-300">
+          <div className="flex min-h-0 flex-1 flex-col">
+            
+            {/* Legend (Chú giải) */}
+            <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4 text-xs font-bold text-slate-500">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                Thanh mẫu (hàng trên)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                Vận mẫu (cột trái)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Volume2 className="w-3.5 h-3.5 text-orange-500" />
+                Bấm ô để nghe & chọn thanh điệu
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Play className="w-3.5 h-3.5 text-emerald-500" />
+                Bấm tiêu đề hàng/cột để Auto Play
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="inline-flex h-2.5 w-16 rounded-full overflow-hidden ring-1 ring-slate-200" style={{ background: 'linear-gradient(90deg, rgba(16,185,129,0.10), rgba(16,185,129,0.55))' }}></span>
+                Đã nghe (nhạt → đậm)
+              </span>
+            </div>
+
+            {/* Table Area */}
+            <div className="mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-none border-y border-slate-200 bg-slate-50 shadow-sm sm:rounded-2xl sm:border mx-4">
+              <PinyinTable />
+            </div>
+
+          </div>
+        </main>
+
+      </div>
     </div>
   );
 }
