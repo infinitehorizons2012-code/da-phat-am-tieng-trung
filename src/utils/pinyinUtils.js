@@ -32,24 +32,39 @@ export const applyTone = (syllable, tone) => {
   return syllable;
 };
 
+// Global audio object để có thể dừng khi đang phát dở
+let currentAudio = null;
+
 export const playPinyinAudio = (text, onEnd) => {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-CN';
-    utterance.rate = 0.8;
-    if (onEnd) utterance.onend = onEnd;
-    window.speechSynthesis.speak(utterance);
-  } else {
-    console.warn('Text-to-Speech không được hỗ trợ trên trình duyệt này.');
-    if (onEnd) onEnd();
+  stopAudio();
+  
+  // Sử dụng Google Translate TTS API (miễn phí, không cần key, giọng chuẩn)
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=zh-CN&client=tw-ob`;
+  
+  currentAudio = new Audio(url);
+  
+  if (onEnd) {
+    currentAudio.addEventListener('ended', onEnd);
+    currentAudio.addEventListener('error', onEnd); // Nếu lỗi cũng gọi onEnd để đi tiếp
   }
+  
+  currentAudio.play().catch(error => {
+    console.error("Lỗi phát audio từ API:", error);
+    // Fallback: Nếu không tải được audio mạng, dùng Web Speech API
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-CN';
+      if (onEnd) utterance.onend = onEnd;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      if (onEnd) onEnd();
+    }
+  });
 };
 
 export const playAudioSequence = (texts, onProgress, onComplete) => {
-  if (!('speechSynthesis' in window)) return;
-  
-  window.speechSynthesis.cancel();
+  stopAudio();
   
   let currentIndex = 0;
   
@@ -62,23 +77,22 @@ export const playAudioSequence = (texts, onProgress, onComplete) => {
     const text = texts[currentIndex];
     if (onProgress) onProgress(currentIndex, text);
     
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-CN';
-    utterance.rate = 0.8;
-    
-    utterance.onend = () => {
+    playPinyinAudio(text, () => {
       currentIndex++;
       // Thêm độ trễ nhỏ giữa các âm để người dùng dễ nghe
       setTimeout(playNext, 400); 
-    };
-    
-    window.speechSynthesis.speak(utterance);
+    });
   };
   
   playNext();
 };
 
 export const stopAudio = () => {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
