@@ -1,5 +1,6 @@
 import React from 'react';
 import PinyinTable from './components/PinyinTable';
+import TonePairPractice from './components/TonePairPractice';
 import { Volume2, Play } from 'lucide-react';
 
 function App() {
@@ -47,6 +48,9 @@ function App() {
                 Đã nghe (nhạt → đậm)
               </span>
             </div>
+
+            {/* Tone Pair Sandbox Area */}
+            <TonePairPractice />
 
             {/* Table Area */}
             <div className="mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-none border-y border-slate-200 bg-slate-50 shadow-sm sm:rounded-2xl sm:border mx-4">
