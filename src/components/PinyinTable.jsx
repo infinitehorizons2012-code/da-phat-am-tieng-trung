@@ -125,6 +125,8 @@ export default function PinyinTable() {
                   return (
                     <PinyinCell 
                       key={init.id}
+                      initial={init.id}
+                      final={final}
                       syllable={displaySyllable}
                       isActive={activeCell === cellId}
                       isPlaying={playingCell === cellId}

@@ -1,7 +1,8 @@
 import React from 'react';
 import { applyTone, playPinyinAudio } from '../utils/pinyinUtils';
+import { Volume2, X } from 'lucide-react';
 
-export default function PinyinCell({ syllable, onActivate, isActive, isPlaying, listenCount, onTonePlayed }) {
+export default function PinyinCell({ initial, final, syllable, onActivate, isActive, isPlaying, listenCount, onTonePlayed }) {
   if (!syllable) {
     return <td className="pinyin-cell empty" />;
   }
@@ -20,17 +21,15 @@ export default function PinyinCell({ syllable, onActivate, isActive, isPlaying, 
     { num: 4, label: applyTone(syllable, 4) }
   ];
 
-  // Calculate background color based on listenCount
-  // 0: default, >0: varying shades of emerald
   let bgClass = '';
   if (isPlaying) {
-    bgClass = 'bg-orange-100 font-bold transform scale-110 shadow-md text-orange-700 z-10 relative';
+    bgClass = 'bg-orange-100 font-bold shadow-md text-orange-700 z-10 relative';
   } else if (isActive) {
-    bgClass = 'bg-rose-100 font-bold transform scale-105 shadow-sm text-rose-700 z-10 relative';
+    bgClass = 'bg-rose-50 font-bold shadow-sm text-rose-700 z-40 relative';
   } else if (listenCount > 0) {
-    if (listenCount === 1) bgClass = 'bg-emerald-50/50 text-emerald-700';
-    else if (listenCount === 2) bgClass = 'bg-emerald-100 text-emerald-800';
-    else if (listenCount === 3) bgClass = 'bg-emerald-200 text-emerald-900';
+    if (listenCount === 1) bgClass = 'bg-emerald-50/70 text-emerald-700';
+    else if (listenCount === 2) bgClass = 'bg-emerald-100/80 text-emerald-800';
+    else if (listenCount === 3) bgClass = 'bg-emerald-200/90 text-emerald-900';
     else bgClass = 'bg-emerald-300 text-emerald-950 font-bold';
   } else {
     bgClass = 'hover:bg-slate-50 text-slate-700';
@@ -38,7 +37,7 @@ export default function PinyinCell({ syllable, onActivate, isActive, isPlaying, 
 
   return (
     <td 
-      className={`pinyin-cell ${bgClass} transition-all duration-300 cursor-pointer p-2 relative text-sm sm:text-base`}
+      className={`pinyin-cell ${bgClass} transition-colors duration-200 cursor-pointer p-2 sm:p-3 relative text-sm sm:text-base border border-transparent hover:border-slate-200`}
       onClick={(e) => {
         e.stopPropagation();
         onActivate();
@@ -46,21 +45,45 @@ export default function PinyinCell({ syllable, onActivate, isActive, isPlaying, 
         onTonePlayed();
       }}
     >
-      <span>{syllable}</span>
+      <span className={isActive ? 'font-black' : ''}>{syllable}</span>
       
       {isActive && (
-        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-white rounded-xl shadow-lg border border-slate-200 flex p-1 gap-1 z-50">
-          <div className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-slate-200 rotate-45"></div>
-          {tones.map(t => (
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-200 w-max z-50 overflow-hidden cursor-default"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-2 bg-slate-50 border-b border-slate-100">
+            <div className="text-[10px] font-black tracking-wider text-slate-400 flex items-center gap-1.5 uppercase">
+              {initial && final ? `${initial} + ${final}` : syllable}
+              <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+              <span className="text-emerald-500">NGHE {listenCount}</span>
+            </div>
             <button 
-              key={t.num} 
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-50 hover:text-rose-600 font-bold text-slate-700 transition-colors text-sm" 
-              onClick={(e) => handleToneClick(e, t.num)}
-              title={`Thanh ${t.num}`}
+              className="text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-200 p-1 -mr-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                onActivate(); // Togging it off since it's already active
+              }}
             >
-              {t.label}
+              <X size={14} strokeWidth={3} />
             </button>
-          ))}
+          </div>
+
+          {/* Tone Buttons */}
+          <div className="flex gap-2 p-3 sm:p-4 bg-white">
+            {tones.map(t => (
+              <button 
+                key={t.num} 
+                className="flex flex-col items-center justify-center min-w-[3rem] h-14 sm:w-14 sm:h-16 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors border border-slate-100 hover:border-rose-200 hover:text-rose-600 group" 
+                onClick={(e) => handleToneClick(e, t.num)}
+                title={`Thanh ${t.num}`}
+              >
+                <span className="text-lg sm:text-xl font-black text-slate-700 group-hover:text-rose-600 leading-none mb-1">{t.label}</span>
+                <Volume2 size={14} className="text-slate-300 group-hover:text-rose-400" />
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </td>
