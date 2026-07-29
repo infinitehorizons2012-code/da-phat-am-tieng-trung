@@ -134,6 +134,7 @@ export default function PinyinTable() {
                         setPlayingCell(null);
                         setActiveCell(cellId);
                       }}
+                      onClose={() => setActiveCell(null)}
                       onTonePlayed={() => handleTonePlayed(cellId)}
                     />
                   );

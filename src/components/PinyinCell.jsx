@@ -2,7 +2,9 @@ import React from 'react';
 import { applyTone, playPinyinAudio } from '../utils/pinyinUtils';
 import { Volume2, X } from 'lucide-react';
 
-export default function PinyinCell({ initial, final, syllable, onActivate, isActive, isPlaying, listenCount, onTonePlayed }) {
+export default function PinyinCell({ initial, final, syllable, onActivate, onClose, isActive, isPlaying, listenCount, onTonePlayed }) {
+  const [audioSource, setAudioSource] = React.useState('');
+
   if (!syllable) {
     return <td className="pinyin-cell empty" />;
   }
@@ -10,7 +12,7 @@ export default function PinyinCell({ initial, final, syllable, onActivate, isAct
   const handleToneClick = (e, tone) => {
     e.stopPropagation();
     const textToRead = applyTone(syllable, tone);
-    playPinyinAudio(textToRead);
+    playPinyinAudio(textToRead, null, setAudioSource);
     onTonePlayed();
   };
 
@@ -41,7 +43,7 @@ export default function PinyinCell({ initial, final, syllable, onActivate, isAct
       onClick={(e) => {
         e.stopPropagation();
         onActivate();
-        playPinyinAudio(applyTone(syllable, 1));
+        playPinyinAudio(applyTone(syllable, 1), null, setAudioSource);
         onTonePlayed();
       }}
     >
@@ -56,14 +58,18 @@ export default function PinyinCell({ initial, final, syllable, onActivate, isAct
           <div className="flex items-center justify-between px-4 py-2 bg-slate-50 border-b border-slate-100">
             <div className="text-[10px] font-black tracking-wider text-slate-400 flex items-center gap-1.5 uppercase">
               {initial && final ? `${initial} + ${final}` : syllable}
-              <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-              <span className="text-emerald-500">NGHE {listenCount}</span>
+              {audioSource && (
+                <>
+                  <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                  <span className="text-emerald-500 lowercase">Nguồn: {audioSource}</span>
+                </>
+              )}
             </div>
             <button 
               className="text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-200 p-1 -mr-2"
               onClick={(e) => {
                 e.stopPropagation();
-                onActivate(); // Togging it off since it's already active
+                if (onClose) onClose(); 
               }}
             >
               <X size={14} strokeWidth={3} />

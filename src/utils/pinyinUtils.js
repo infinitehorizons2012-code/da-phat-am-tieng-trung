@@ -60,17 +60,17 @@ export const pinyinToNumber = (pinyin) => {
   return basePinyin + tone;
 };
 
-export const playPinyinAudio = (text, onEnd) => {
+export const playPinyinAudio = (text, onEnd, onStatus) => {
   stopAudio();
   
   const fileName = pinyinToNumber(text);
   
   // Danh sách các máy chủ dự phòng trong trường hợp mạng bị chặn (thường gặp ở VN)
   const cdnList = [
-    `https://cdn.jsdelivr.net/gh/shikangkai/Chinese-Pinyin-Audio@master/Pinyin-Female/${fileName}.mp3`,
-    `https://fastly.jsdelivr.net/gh/shikangkai/Chinese-Pinyin-Audio@master/Pinyin-Female/${fileName}.mp3`,
-    `https://gcore.jsdelivr.net/gh/shikangkai/Chinese-Pinyin-Audio@master/Pinyin-Female/${fileName}.mp3`,
-    `https://raw.githubusercontent.com/shikangkai/Chinese-Pinyin-Audio/master/Pinyin-Female/${fileName}.mp3`
+    { name: 'cdn.jsdelivr', url: `https://cdn.jsdelivr.net/gh/shikangkai/Chinese-Pinyin-Audio@master/Pinyin-Female/${fileName}.mp3` },
+    { name: 'fastly.jsdelivr', url: `https://fastly.jsdelivr.net/gh/shikangkai/Chinese-Pinyin-Audio@master/Pinyin-Female/${fileName}.mp3` },
+    { name: 'gcore.jsdelivr', url: `https://gcore.jsdelivr.net/gh/shikangkai/Chinese-Pinyin-Audio@master/Pinyin-Female/${fileName}.mp3` },
+    { name: 'githubusercontent', url: `https://raw.githubusercontent.com/shikangkai/Chinese-Pinyin-Audio/master/Pinyin-Female/${fileName}.mp3` }
   ];
   
   let currentTry = 0;
@@ -78,6 +78,7 @@ export const playPinyinAudio = (text, onEnd) => {
   const tryNext = () => {
     if (currentTry >= cdnList.length) {
       console.warn("Tất cả máy chủ MP3 đều lỗi hoặc thiếu file. Dùng TTS dự phòng.");
+      if (onStatus) onStatus('Google TTS');
       // Dùng lại Google TTS làm phương án chống cháy cuối cùng (ít nhất vẫn ra tiếng)
       const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=zh-CN&client=tw-ob`;
       const fallbackAudio = new Audio(fallbackUrl);
@@ -85,6 +86,7 @@ export const playPinyinAudio = (text, onEnd) => {
       
       fallbackAudio.addEventListener('ended', () => { if (onEnd) onEnd(); });
       fallbackAudio.addEventListener('error', () => {
+        if (onStatus) onStatus('SpeechSynthesis');
         if ('speechSynthesis' in window) {
           window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(text);
@@ -99,7 +101,8 @@ export const playPinyinAudio = (text, onEnd) => {
       return;
     }
     
-    const url = cdnList[currentTry];
+    if (onStatus) onStatus(cdnList[currentTry].name);
+    const url = cdnList[currentTry].url;
     const audio = new Audio(url);
     
     // Gán ngay để hàm stopAudio() có thể dừng nếu user bấm nhanh ô khác
