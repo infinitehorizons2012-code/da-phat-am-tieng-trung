@@ -35,11 +35,14 @@ export const applyTone = (syllable, tone) => {
 // Global audio object để có thể dừng khi đang phát dở
 let currentAudio = null;
 
-export const playPinyinAudio = (text, onEnd) => {
+export const playPinyinAudio = (syllable, tone, onEnd) => {
   stopAudio();
   
-  // Sử dụng Google Translate TTS API (miễn phí, không cần key, giọng chuẩn)
-  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=zh-CN&client=tw-ob`;
+  // Trích xuất file MP3 trực tiếp từ CDN của Bye HSK
+  // Ví dụ: syllable = 'po', tone = 1 => 'https://img.khonggian.org/pychart/po1.mp3'
+  // Chú ý: Một số âm như 'ü' trên URL có thể được viết là 'v'. Ta cần replace 'ü' thành 'v'.
+  const normalizedSyllable = syllable.replace(/ü/g, 'v');
+  const url = `https://img.khonggian.org/pychart/${normalizedSyllable}${tone}.mp3`;
   
   currentAudio = new Audio(url);
   
@@ -49,37 +52,30 @@ export const playPinyinAudio = (text, onEnd) => {
   }
   
   currentAudio.play().catch(error => {
-    console.error("Lỗi phát audio từ API:", error);
-    // Fallback: Nếu không tải được audio mạng, dùng Web Speech API
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'zh-CN';
-      if (onEnd) utterance.onend = onEnd;
-      window.speechSynthesis.speak(utterance);
-    } else {
-      if (onEnd) onEnd();
-    }
+    console.error("Lỗi phát audio từ Bye HSK CDN:", error);
+    if (onEnd) onEnd();
   });
 };
 
-export const playAudioSequence = (texts, onProgress, onComplete) => {
+export const playAudioSequence = (syllablesData, onProgress, onComplete) => {
   stopAudio();
   
   let currentIndex = 0;
   
   const playNext = () => {
-    if (currentIndex >= texts.length) {
+    if (currentIndex >= syllablesData.length) {
       if (onComplete) onComplete();
       return;
     }
     
-    const text = texts[currentIndex];
-    if (onProgress) onProgress(currentIndex, text);
+    const data = syllablesData[currentIndex];
+    // data có dạng { cellId, text: 'ma' }
     
-    playPinyinAudio(text, () => {
+    if (onProgress) onProgress(currentIndex, data);
+    
+    // Mặc định Auto Play đọc thanh 1
+    playPinyinAudio(data.text, 1, () => {
       currentIndex++;
-      // Thêm độ trễ nhỏ giữa các âm để người dùng dễ nghe
       setTimeout(playNext, 400); 
     });
   };
@@ -92,8 +88,5 @@ export const stopAudio = () => {
     currentAudio.pause();
     currentAudio.currentTime = 0;
     currentAudio = null;
-  }
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
   }
 };

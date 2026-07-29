@@ -31,10 +31,8 @@ export default function PinyinTable() {
     
     if (syllablesData.length === 0) return;
     
-    const texts = syllablesData.map(s => applyTone(s.text, 1));
-    
     playAudioSequence(
-      texts,
+      syllablesData,
       (index) => {
         const cellId = syllablesData[index].cellId;
         setPlayingCell(cellId);
