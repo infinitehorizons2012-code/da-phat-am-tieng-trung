@@ -8,13 +8,28 @@ import ToneSandhiRules from './components/ToneSandhiRules';
 import ProgressDashboard from './components/ProgressDashboard';
 import LoginModal from './components/LoginModal';
 import { useAuth } from './context/AuthContext';
-import { Volume2, Play, Grid, Headphones, LayoutGrid, BookOpen, Zap, User, LogOut, TreePine } from 'lucide-react';
+import { Volume2, Play, Grid, Headphones, LayoutGrid, BookOpen, Zap, User, LogOut, TreePine, Trash2 } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('table');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, deleteAccount } = useAuth();
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa tài khoản và toàn bộ quá trình học tập không? Thao tác này không thể hoàn tác!")) {
+      try {
+        await deleteAccount();
+        alert("Đã xóa tài khoản thành công.");
+      } catch (error) {
+        if (error.code === 'auth/requires-recent-login') {
+          alert("Vui lòng đăng xuất và đăng nhập lại trước khi xóa tài khoản để bảo mật.");
+        } else {
+          alert("Có lỗi xảy ra khi xóa tài khoản: " + error.message);
+        }
+      }
+    }
+  };
 
   return (
     <div className="flex bg-slate-50 font-sans text-slate-800 h-screen w-full">
@@ -95,13 +110,22 @@ function App() {
                     <span className="text-sm font-bold text-slate-700 leading-none">{currentUser.displayName || 'Bé ngoan'}</span>
                     <span className="text-[10px] text-slate-400 font-medium">Đang học Pinyin</span>
                   </div>
-                  <button 
-                    onClick={() => logout()}
-                    title="Đăng xuất"
-                    className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-rose-100 hover:text-rose-600 transition-colors border border-slate-200"
-                  >
-                    <LogOut size={16} />
-                  </button>
+                  <div className="flex gap-1.5">
+                    <button 
+                      onClick={() => logout()}
+                      title="Đăng xuất"
+                      className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors border border-slate-200"
+                    >
+                      <LogOut size={16} />
+                    </button>
+                    <button 
+                      onClick={handleDeleteAccount}
+                      title="Xóa tài khoản"
+                      className="w-9 h-9 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition-colors border border-rose-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button 

@@ -4,9 +4,11 @@ import {
   signInWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  deleteUser as deleteFirebaseUser
 } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { auth, db } from '../config/firebase';
 
 const AuthContext = createContext();
 
@@ -38,6 +40,21 @@ export const AuthProvider = ({ children }) => {
     return signOut(auth);
   };
 
+  // Delete Account
+  const deleteAccount = async () => {
+    if (!currentUser) return;
+    try {
+      // Xóa data trên firestore
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await deleteDoc(userDocRef);
+      // Xóa auth user
+      await deleteFirebaseUser(currentUser);
+      setCurrentUser(null);
+    } catch (error) {
+      throw error;
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -51,7 +68,8 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     signup,
     login,
-    logout
+    logout,
+    deleteAccount
   };
 
   return (
