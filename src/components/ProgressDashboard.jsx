@@ -142,7 +142,7 @@ export default function ProgressDashboard() {
             🌳 Khu Vườn Pinyin Của Bé
           </h2>
           <p className="text-slate-500 text-sm mt-1">
-            Mỗi lần học bài, bé sẽ gieo một hạt giống. Trả lời đúng nhiều lần, hạt giống sẽ nảy mầm và nở hoa!
+            Mỗi lần làm trắc nghiệm, bé sẽ gieo một hạt giống. Trả lời đúng nhiều lần, hạt giống sẽ nảy mầm và nở hoa!
           </p>
         </div>
         <div className="text-right">
@@ -150,33 +150,11 @@ export default function ProgressDashboard() {
           <div className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-wider">Tổng Tiến Độ</div>
         </div>
       </div>
-      
-      {/* Nút Thi Cuối Kỳ */}
-      <div className="px-6 py-4 bg-white border-b border-slate-100 flex justify-center">
-        <button 
-          onClick={() => {
-            if (overallProgress < 100) {
-              alert("Bé cần đạt 100% tiến độ khu vườn (tất cả các cây đều nở hoa) để mở khóa Kỳ thi Cuối kỳ nhé!");
-            } else {
-              // Trigger event or context to open exam mode
-              window.dispatchEvent(new CustomEvent('start-final-exam'));
-            }
-          }}
-          className={`px-8 py-3 rounded-xl font-black flex items-center gap-2 transition-all ${
-            overallProgress >= 100 
-              ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-lg hover:shadow-rose-500/30 hover:-translate-y-0.5 cursor-pointer animate-pulse' 
-              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-          }`}
-        >
-          <TreeIcon level={4} />
-          THI CUỐI KỲ (RA QUẢ)
-        </button>
-      </div>
 
       {/* Tabs */}
       <div className="flex border-b border-slate-200 bg-white">
         <button
-          className={`flex-1 py-4 text-center font-bold text-sm transition-colors ${
+          className={`flex-1 py-4 text-center font-bold text-sm sm:text-base transition-colors ${
             activeTab === 'categories' ? 'text-rose-600 border-b-2 border-rose-600 bg-rose-50/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
           }`}
           onClick={() => setActiveTab('categories')}
@@ -184,18 +162,26 @@ export default function ProgressDashboard() {
           Theo Danh Mục
         </button>
         <button
-          className={`flex-1 py-4 text-center font-bold text-sm transition-colors ${
+          className={`flex-1 py-4 text-center font-bold text-sm sm:text-base transition-colors ${
             activeTab === 'levels' ? 'text-rose-600 border-b-2 border-rose-600 bg-rose-50/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
           }`}
           onClick={() => setActiveTab('levels')}
         >
           Phân Loại Hạt / Cây
         </button>
+        <button
+          className={`flex-1 py-4 text-center font-bold text-sm sm:text-base transition-colors flex items-center justify-center gap-2 ${
+            activeTab === 'exam' ? 'text-rose-600 border-b-2 border-rose-600 bg-rose-50/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+          }`}
+          onClick={() => setActiveTab('exam')}
+        >
+          🍎 Thi Cuối Kỳ
+        </button>
       </div>
 
       <div className="p-6 overflow-y-auto hide-scrollbar flex-1 bg-slate-50/50">
         
-        {activeTab === 'categories' ? (
+        {activeTab === 'categories' && (
           /* Progress Bars */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <ProgressCard title="Thanh mẫu" stats={initStats} color="bg-rose-500" icon="🔤" catKey="initials" />
@@ -206,7 +192,9 @@ export default function ProgressDashboard() {
             <ProgressCard title="Quy tắc biến điệu" stats={sandhiStats} color="bg-orange-500" icon="⚡" catKey="sandhiRules" />
             <ProgressCard title="Ma trận âm điệu" stats={pairStats} color="bg-indigo-500" icon="📊" catKey="tonePairs" />
           </div>
-        ) : (
+        )}
+        
+        {activeTab === 'levels' && (
           /* Garden Stats */
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
             <h3 className="text-lg font-black text-slate-800 mb-6 uppercase tracking-wider text-center">Thống Kê Vườn Cây</h3>
@@ -217,6 +205,49 @@ export default function ProgressDashboard() {
               <StatBox level={2} count={getTreeCountByLevel(2)} onClick={() => setSelectedLevel(2)} />
               <StatBox level={3} count={getTreeCountByLevel(3)} onClick={() => setSelectedLevel(3)} />
               <StatBox level={4} count={getTreeCountByLevel(4)} onClick={() => setSelectedLevel(4)} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'exam' && (
+          <div className="flex flex-col items-center justify-center py-10 px-4 text-center animate-in fade-in duration-300">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-lg w-full relative overflow-hidden">
+               {/* Decorative background circle */}
+               <div className="absolute -top-16 -right-16 w-32 h-32 bg-rose-100 rounded-full opacity-50"></div>
+               <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-emerald-100 rounded-full opacity-50"></div>
+               
+               <h3 className="text-2xl font-black text-rose-600 mb-4 flex items-center justify-center gap-2 relative z-10">
+                 <TreeIcon level={4} /> Kỳ Thi Cuối Kỳ (Ra Quả)
+               </h3>
+               <p className="text-slate-600 mb-6 text-sm sm:text-base relative z-10 font-medium">
+                 Bé cần đạt <span className="font-bold text-emerald-600">100% tiến độ khu vườn</span> (tất cả các cây đều nở hoa) để mở khóa Kỳ thi Cuối kỳ nhé!
+                 <br/><br/>
+                 Khi thi đậu (đạt 70%), bé sẽ nhận được <span className="font-bold text-rose-600">quả táo đỏ</span> (level 5). Nhưng nếu sai, những phần đó sẽ <span className="font-bold text-amber-600">tụt điểm xuống mầm non</span> (level 2) đấy nhé!
+               </p>
+               
+               <div className="relative z-10">
+                 <button 
+                    onClick={() => {
+                      if (overallProgress < 100) {
+                        alert("Bé cần đạt 100% tiến độ khu vườn (tất cả các cây đều nở hoa) để mở khóa Kỳ thi Cuối kỳ nhé!");
+                      } else {
+                        window.dispatchEvent(new CustomEvent('start-final-exam'));
+                      }
+                    }}
+                    className={`px-8 py-4 rounded-xl font-black transition-all ${
+                      overallProgress >= 100 
+                        ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-lg hover:shadow-rose-500/30 hover:-translate-y-0.5 cursor-pointer animate-pulse w-full text-lg' 
+                        : 'bg-slate-100 text-slate-400 cursor-not-allowed w-full border border-slate-200'
+                    }`}
+                  >
+                    {overallProgress >= 100 ? '🚀 BẮT ĐẦU THI NGAY' : '🔒 CHƯA ĐỦ ĐIỀU KIỆN THI'}
+                  </button>
+                  {overallProgress < 100 && (
+                    <div className="mt-3 text-xs font-bold text-slate-400 uppercase">
+                      Tiến độ hiện tại: {overallProgress}% / 100%
+                    </div>
+                  )}
+               </div>
             </div>
           </div>
         )}
