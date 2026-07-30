@@ -82,56 +82,23 @@ export default function QuizMode() {
   */
 
   const handleSelect = (index, isCorrect) => {
-    if (selectedOption !== null) return; // Đã chọn rồi thì không cho chọn lại
+    if (selectedOption !== null) return;
     
     setSelectedOption(index);
+    // const isCorrect = currentQuestion.options[index].isCorrect;
+    
     if (isCorrect) {
       setStats(prev => ({ ...prev, correct: prev.correct + 1 }));
     } else {
       setStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
     }
 
-    // Cập nhật điểm lên hệ thống Memrise
-    if (currentQuestion) {
-      if (currentQuestion.isSpellingMode) {
-        updateScore('spellingRules', currentQuestion.ruleId || 'general', isCorrect);
-      } else if (currentQuestion.isTonePairMode) {
-        updateScore('tonePairs', `${currentQuestion.originalTones[0]}-${currentQuestion.originalTones[1]}`, isCorrect);
-        // Bóc tách tính điểm thêm cho Quy tắc biến điệu nếu câu hỏi thuộc một trong 3 quy tắc
-        if (currentQuestion.ruleId) {
-          updateScore('sandhiRules', currentQuestion.ruleId, isCorrect);
-        }
-      } else {
-        // Cập nhật âm tiết và thanh điệu
-        updateScore('syllables', `${currentQuestion.correctBase}${currentQuestion.correctTone}`, isCorrect);
-        if (mode === 'tone') {
-          updateScore('tones', currentQuestion.correctTone.toString(), isCorrect);
-        }
-        
-        // Dò ngược để cập nhật thanh mẫu và vận mẫu
-        let foundInitial = null;
-        let foundFinal = null;
-        
-        // Tìm trong ma trận pinyin
-        for (const initial of Object.keys(pinyinMatrix)) {
-          for (const final of Object.keys(pinyinMatrix[initial])) {
-            if (pinyinMatrix[initial][final] === currentQuestion.correctBase) {
-              foundInitial = initial;
-              foundFinal = final;
-              break;
-            }
-          }
-          if (foundInitial) break;
-        }
-        
-        if (foundInitial && foundInitial !== 'none') {
-          updateScore('initials', foundInitial, isCorrect);
-        }
-        if (foundFinal) {
-          updateScore('finals', foundFinal, isCorrect);
-        }
-      }
-    }
+    // Tích lũy kết quả, chưa cộng điểm vội
+    setRoundResults(prev => [...prev, {
+      question: currentQuestion,
+      isCorrect: isCorrect,
+      currentMode: mode
+    }]);
   };
 
   const handleNext = () => {
@@ -142,6 +109,50 @@ export default function QuizMode() {
       setIsFinished(true);
     }
   };
+
+  // Cập nhật điểm một lần duy nhất khi hoàn thành trọn vẹn vòng thi
+  useEffect(() => {
+    if (isFinished && roundResults.length > 0) {
+      roundResults.forEach(res => {
+        const { question, isCorrect, currentMode } = res;
+        
+        if (question.isSpellingMode) {
+          updateScore('spellingRules', question.ruleId || 'general', isCorrect);
+        } else if (question.isTonePairMode) {
+          updateScore('tonePairs', `${question.originalTones[0]}-${question.originalTones[1]}`, isCorrect);
+          if (question.ruleId) {
+            updateScore('sandhiRules', question.ruleId, isCorrect);
+          }
+        } else {
+          updateScore('syllables', `${question.correctBase}${question.correctTone}`, isCorrect);
+          if (currentMode === 'tone') {
+            updateScore('tones', question.correctTone.toString(), isCorrect);
+          }
+          
+          let foundInitial = null;
+          let foundFinal = null;
+          
+          for (const initial of Object.keys(pinyinMatrix)) {
+            for (const final of Object.keys(pinyinMatrix[initial])) {
+              if (pinyinMatrix[initial][final] === question.correctBase) {
+                foundInitial = initial;
+                foundFinal = final;
+                break;
+              }
+            }
+            if (foundInitial) break;
+          }
+          
+          if (foundInitial && foundInitial !== 'none') {
+            updateScore('initials', foundInitial, isCorrect);
+          }
+          if (foundFinal) {
+            updateScore('finals', foundFinal, isCorrect);
+          }
+        }
+      });
+    }
+  }, [isFinished]);
 
   if (questions.length === 0) return null;
 
