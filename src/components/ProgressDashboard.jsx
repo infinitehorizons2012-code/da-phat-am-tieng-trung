@@ -240,6 +240,21 @@ export default function ProgressDashboard() {
       {selectedCategory !== null && (() => {
         const items = getItemsForCategory(selectedCategory.key);
         
+        let totalItemsInCategory = 0;
+        switch (selectedCategory.key) {
+          case 'initials': totalItemsInCategory = totalInitials; break;
+          case 'finals': totalItemsInCategory = totalFinals; break;
+          case 'tones': totalItemsInCategory = totalTones; break;
+          case 'syllables': totalItemsInCategory = totalSyllables; break;
+          case 'tonePairs': totalItemsInCategory = totalTonePairs; break;
+          case 'spellingRules': totalItemsInCategory = totalSpellingRules; break;
+          case 'sandhiRules': totalItemsInCategory = totalSandhiRules; break;
+          default: totalItemsInCategory = 0;
+        }
+        
+        const maxScore = totalItemsInCategory * 3;
+        const currentScore = items.reduce((acc, curr) => acc + Math.min(3, curr.level), 0);
+        
         return (
           <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200" onClick={() => setSelectedCategory(null)}>
             <div className="bg-white rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -248,9 +263,16 @@ export default function ProgressDashboard() {
                   <h3 className="text-xl font-black text-slate-800">
                     Chi tiết: {selectedCategory.title}
                   </h3>
-                  <p className="text-sm font-medium text-slate-500">
-                    Đã học {items.length} mục
-                  </p>
+                  <div className="mt-1 flex items-center gap-3 text-sm font-medium text-slate-500">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                      Đã học {items.length}/{totalItemsInCategory} mục
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      Đạt {currentScore}/{maxScore} điểm
+                    </span>
+                  </div>
                 </div>
                 <button onClick={() => setSelectedCategory(null)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
                   <X size={20} />
