@@ -102,3 +102,56 @@ export const generateQuizRound = (numQuestions = 10) => {
   
   return questions;
 };
+
+import { pinyinMatrix } from './pinyinData';
+
+// Trích xuất tất cả các âm tiết hợp lệ từ pinyinMatrix
+const allValidSyllables = [];
+for (const initial in pinyinMatrix) {
+  for (const final in pinyinMatrix[initial]) {
+    allValidSyllables.push(pinyinMatrix[initial][final]);
+  }
+}
+// Loại bỏ trùng lặp nếu có
+const uniqueSyllables = [...new Set(allValidSyllables)];
+
+// Hàm tạo 10 câu hỏi ngẫu nhiên từ toàn bộ các âm Pinyin
+export const generateRandomQuizRound = (numQuestions = 10) => {
+  const questions = [];
+  
+  for (let i = 0; i < numQuestions; i++) {
+    // 1. Chọn ngẫu nhiên 1 đáp án đúng
+    const correctIdx = Math.floor(Math.random() * uniqueSyllables.length);
+    const correctSyllable = uniqueSyllables[correctIdx];
+    const correctTone = Math.floor(Math.random() * 4) + 1; // 1-4
+    
+    // 2. Chọn ngẫu nhiên 3 đáp án sai (đảm bảo không trùng với đáp án đúng và không trùng nhau)
+    const options = [
+      { base: correctSyllable, tone: correctTone, isCorrect: true }
+    ];
+    
+    while (options.length < 4) {
+      const wrongIdx = Math.floor(Math.random() * uniqueSyllables.length);
+      const wrongSyllable = uniqueSyllables[wrongIdx];
+      const wrongTone = Math.floor(Math.random() * 4) + 1;
+      
+      // Kiểm tra trùng lặp
+      const isDuplicate = options.some(opt => opt.base === wrongSyllable && opt.tone === wrongTone);
+      if (!isDuplicate) {
+        options.push({ base: wrongSyllable, tone: wrongTone, isCorrect: false });
+      }
+    }
+    
+    // 3. Xáo trộn đáp án
+    const shuffledOptions = options.sort(() => Math.random() - 0.5);
+    
+    questions.push({
+      id: i + 1,
+      correctBase: correctSyllable,
+      correctTone: correctTone,
+      options: shuffledOptions
+    });
+  }
+  
+  return questions;
+};

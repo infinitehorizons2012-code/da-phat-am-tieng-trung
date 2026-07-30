@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { generateQuizRound } from '../data/quizData';
+import { generateQuizRound, generateRandomQuizRound } from '../data/quizData';
 import { applyTone, playPinyinAudio } from '../utils/pinyinUtils';
-import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
+import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe } from 'lucide-react';
 
 export default function QuizMode() {
+  const [mode, setMode] = useState('confusing'); // 'confusing' or 'all'
   const [questions, setQuestions] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -12,8 +13,12 @@ export default function QuizMode() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Khởi tạo vòng mới
-  const startNewRound = () => {
-    setQuestions(generateQuizRound(10));
+  const startNewRound = (newMode = mode) => {
+    if (newMode === 'confusing') {
+      setQuestions(generateQuizRound(10));
+    } else {
+      setQuestions(generateRandomQuizRound(10));
+    }
     setCurrentIdx(0);
     setSelectedOption(null);
     setStats({ correct: 0, wrong: 0 });
@@ -23,6 +28,11 @@ export default function QuizMode() {
   useEffect(() => {
     startNewRound();
   }, []);
+
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    startNewRound(newMode);
+  };
 
   const currentQuestion = questions[currentIdx];
 
@@ -100,20 +110,39 @@ export default function QuizMode() {
   return (
     <div className="flex flex-col max-w-5xl mx-auto w-full bg-slate-50 rounded-2xl shadow-sm border border-slate-200 overflow-hidden my-4">
       {/* Top Header / Progress */}
-      <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-white">
-        <div className="font-bold text-slate-500 text-sm">Chế độ: Âm dễ nhầm lẫn</div>
-        <div className="font-bold text-slate-500 text-sm">Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}</div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-3 border-b border-slate-200 bg-white gap-3">
+        
+        <div className="flex bg-slate-100 p-1 rounded-lg w-full sm:w-auto">
+          <button 
+            onClick={() => handleModeChange('confusing')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'confusing' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Target size={14} />
+            Âm dễ nhầm lẫn
+          </button>
+          <button 
+            onClick={() => handleModeChange('all')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'all' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Globe size={14} />
+            Tất cả các thanh
+          </button>
+        </div>
+
+        <div className="font-bold text-slate-500 text-sm w-full sm:w-auto text-right">
+          Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}
+        </div>
       </div>
       <div className="w-full bg-slate-100 h-2">
         <div 
-          className="bg-blue-500 h-2 transition-all duration-300" 
+          className={`${mode === 'all' ? 'bg-purple-500' : 'bg-blue-500'} h-2 transition-all duration-300`} 
           style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
         ></div>
       </div>
 
       <div className="flex flex-col md:flex-row p-6 gap-6 md:gap-8 items-stretch">
         {/* Left Panel (Audio Playback) */}
-        <div className="w-full md:w-1/3 bg-blue-600 rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group cursor-pointer" onClick={playAudio}>
+        <div className={`w-full md:w-1/3 ${mode === 'all' ? 'bg-purple-600' : 'bg-blue-600'} rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group cursor-pointer transition-colors`} onClick={playAudio}>
           <div className="absolute top-4 bg-white/20 px-3 py-1 rounded-full text-white text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
             Pinyin Drill
           </div>
@@ -125,7 +154,7 @@ export default function QuizMode() {
           <p className="text-white/80 text-sm mb-6 text-center">Nhấp loa hoặc khung này để nghe lại</p>
           
           <button 
-            className={`w-16 h-16 rounded-full bg-white flex items-center justify-center text-blue-600 hover:scale-105 transition-all shadow-lg ${isPlaying ? 'animate-pulse' : ''}`}
+            className={`w-16 h-16 rounded-full bg-white flex items-center justify-center ${mode === 'all' ? 'text-purple-600' : 'text-blue-600'} hover:scale-105 transition-all shadow-lg ${isPlaying ? 'animate-pulse' : ''}`}
             onClick={(e) => { e.stopPropagation(); playAudio(); }}
           >
             <Volume2 size={24} className={isPlaying ? 'animate-bounce' : ''} />
