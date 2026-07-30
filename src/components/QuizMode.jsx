@@ -1,0 +1,214 @@
+import React, { useState, useEffect } from 'react';
+import { generateQuizRound } from '../data/quizData';
+import { applyTone, playPinyinAudio } from '../utils/pinyinUtils';
+import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
+
+export default function QuizMode() {
+  const [questions, setQuestions] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [stats, setStats] = useState({ correct: 0, wrong: 0 });
+  const [isFinished, setIsFinished] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  // Khởi tạo vòng mới
+  const startNewRound = () => {
+    setQuestions(generateQuizRound(10));
+    setCurrentIdx(0);
+    setSelectedOption(null);
+    setStats({ correct: 0, wrong: 0 });
+    setIsFinished(false);
+  };
+
+  useEffect(() => {
+    startNewRound();
+  }, []);
+
+  const currentQuestion = questions[currentIdx];
+
+  const playAudio = () => {
+    if (!currentQuestion) return;
+    setIsPlaying(true);
+    const textToRead = applyTone(currentQuestion.correctBase, currentQuestion.correctTone);
+    playPinyinAudio(textToRead, () => setIsPlaying(false));
+  };
+
+  // Tự động phát âm thanh khi chuyển câu
+  useEffect(() => {
+    if (currentQuestion && selectedOption === null) {
+      // Delay chút để UI render xong rồi mới phát âm
+      const timer = setTimeout(() => {
+        playAudio();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [currentIdx, currentQuestion]);
+
+  const handleSelect = (index, isCorrect) => {
+    if (selectedOption !== null) return; // Đã chọn rồi thì không cho chọn lại
+    
+    setSelectedOption(index);
+    if (isCorrect) {
+      setStats(prev => ({ ...prev, correct: prev.correct + 1 }));
+    } else {
+      setStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIdx < questions.length - 1) {
+      setCurrentIdx(prev => prev + 1);
+      setSelectedOption(null);
+    } else {
+      setIsFinished(true);
+    }
+  };
+
+  if (questions.length === 0) return null;
+
+  if (isFinished) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-sm border border-slate-200 mt-4 mx-4">
+        <h2 className="text-2xl font-black text-slate-800 mb-2">Hoàn thành vòng tập!</h2>
+        <p className="text-slate-500 mb-8">Bạn đã luyện tập rất tốt.</p>
+        
+        <div className="flex gap-8 mb-8">
+          <div className="flex flex-col items-center">
+            <span className="text-4xl font-black text-emerald-500">{stats.correct}</span>
+            <span className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-wider">Câu Đúng</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-4xl font-black text-rose-500">{stats.wrong}</span>
+            <span className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-wider">Câu Sai</span>
+          </div>
+        </div>
+
+        <button 
+          onClick={startNewRound}
+          className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-colors shadow-sm"
+        >
+          <RotateCcw size={18} />
+          Bắt đầu vòng mới
+        </button>
+      </div>
+    );
+  }
+
+  const isAnswered = selectedOption !== null;
+  const isSelectedCorrect = isAnswered && currentQuestion.options[selectedOption].isCorrect;
+
+  return (
+    <div className="flex flex-col max-w-5xl mx-auto w-full bg-slate-50 rounded-2xl shadow-sm border border-slate-200 overflow-hidden my-4">
+      {/* Top Header / Progress */}
+      <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-white">
+        <div className="font-bold text-slate-500 text-sm">Chế độ: Âm dễ nhầm lẫn</div>
+        <div className="font-bold text-slate-500 text-sm">Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}</div>
+      </div>
+      <div className="w-full bg-slate-100 h-2">
+        <div 
+          className="bg-blue-500 h-2 transition-all duration-300" 
+          style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
+        ></div>
+      </div>
+
+      <div className="flex flex-col md:flex-row p-6 gap-6 md:gap-8 items-stretch">
+        {/* Left Panel (Audio Playback) */}
+        <div className="w-full md:w-1/3 bg-blue-600 rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group cursor-pointer" onClick={playAudio}>
+          <div className="absolute top-4 bg-white/20 px-3 py-1 rounded-full text-white text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+            Pinyin Drill
+          </div>
+          
+          <div className={`w-24 h-24 rounded-full border-4 border-white/20 flex items-center justify-center mb-6 transition-transform duration-300 ${isPlaying ? 'scale-110 bg-white/10' : ''}`}>
+            <Headphones size={40} className="text-white" />
+          </div>
+          
+          <p className="text-white/80 text-sm mb-6 text-center">Nhấp loa hoặc khung này để nghe lại</p>
+          
+          <button 
+            className={`w-16 h-16 rounded-full bg-white flex items-center justify-center text-blue-600 hover:scale-105 transition-all shadow-lg ${isPlaying ? 'animate-pulse' : ''}`}
+            onClick={(e) => { e.stopPropagation(); playAudio(); }}
+          >
+            <Volume2 size={24} className={isPlaying ? 'animate-bounce' : ''} />
+          </button>
+        </div>
+
+        {/* Right Panel (Options) */}
+        <div className="w-full md:w-2/3 flex flex-col">
+          <div className="mb-6">
+            <h3 className="text-lg font-black text-slate-800 uppercase">Chọn phiên âm Pinyin đúng:</h3>
+            <p className="text-xs text-slate-400 font-medium italic">Lắng nghe kỹ để phân biệt các âm gần giống nhau.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+            {currentQuestion.options.map((opt, idx) => {
+              const displayLabel = applyTone(opt.base, opt.tone);
+              let btnClass = "border-2 border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50 text-slate-600";
+              
+              if (isAnswered) {
+                if (opt.isCorrect) {
+                  btnClass = "border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-bold z-10 shadow-sm";
+                } else if (selectedOption === idx) {
+                  btnClass = "border-2 border-rose-400 bg-rose-50 text-rose-600 font-bold opacity-50";
+                } else {
+                  btnClass = "border-2 border-slate-200 bg-slate-50 text-slate-400 opacity-50 cursor-not-allowed";
+                }
+              }
+
+              return (
+                <button
+                  key={idx}
+                  onClick={() => handleSelect(idx, opt.isCorrect)}
+                  disabled={isAnswered}
+                  className={`relative flex items-center justify-center p-4 rounded-2xl transition-all duration-200 ${btnClass} text-2xl font-black min-h-[5rem] group`}
+                >
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-100 text-slate-400 text-xs flex items-center justify-center font-bold">
+                    {idx + 1}
+                  </span>
+                  <span>{displayLabel}</span>
+                  {isAnswered && opt.isCorrect && <CheckCircle2 className="absolute right-4 text-emerald-500" size={20} />}
+                  {isAnswered && !opt.isCorrect && selectedOption === idx && <XCircle className="absolute right-4 text-rose-400" size={20} />}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Feedback & Next Button Area */}
+          <div className="mt-6 flex flex-col gap-4 min-h-[6rem]">
+            {isAnswered && (
+              <div className={`p-4 rounded-xl flex items-center justify-between border ${isSelectedCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'}`}>
+                <div className="flex items-center gap-3 font-bold">
+                  {isSelectedCorrect ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+                  {isSelectedCorrect ? 'Nghe chuẩn xác! (+30 XP)' : 'Rất tiếc! Lần sau để ý kỹ hơn nhé.'}
+                </div>
+              </div>
+            )}
+            
+            <button
+              onClick={handleNext}
+              disabled={!isAnswered}
+              className={`w-full py-4 rounded-xl font-black text-lg flex items-center justify-center gap-2 transition-all ${
+                isAnswered 
+                  ? 'bg-slate-800 text-white hover:bg-slate-900 shadow-md transform hover:-translate-y-0.5' 
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              }`}
+            >
+              TIẾP TỤC SANG CÂU MỚI <ArrowRight size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Stats */}
+      <div className="bg-slate-100/50 px-6 py-4 flex items-center gap-4 border-t border-slate-200">
+        <div className="flex -space-x-2">
+          <div className="w-8 h-8 rounded-full bg-rose-200 border-2 border-white flex items-center justify-center text-xs">👩</div>
+          <div className="w-8 h-8 rounded-full bg-blue-200 border-2 border-white flex items-center justify-center text-xs">👦</div>
+          <div className="w-8 h-8 rounded-full bg-emerald-200 border-2 border-white flex items-center justify-center text-xs">👱</div>
+        </div>
+        <div className="font-bold text-slate-500 text-xs uppercase tracking-wider">
+          ĐÚNG: {stats.correct} | SAI: {stats.wrong} | ĐÃ LÀM: {currentIdx + (isFinished?0:1)} / {questions.length}
+        </div>
+      </div>
+    </div>
+  );
+}
