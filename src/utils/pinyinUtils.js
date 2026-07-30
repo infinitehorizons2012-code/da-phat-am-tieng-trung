@@ -183,6 +183,44 @@ export const applyToneSandhi = (tokens) => {
 export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus) => {
   stopAudio();
   
+  if (!tokens || tokens.length === 0) {
+    if (onComplete) onComplete();
+    return;
+  }
+  
+  // 1. Tạo và Unlock toàn bộ Audio Elements trong cùng 1 Call Stack (của Click Event)
+  // Điều này giúp bypass cơ chế chặn Autoplay của Safari/iOS đối với các âm thanh phát nối tiếp nhau.
+  const sequenceAudios = tokens.map(token => {
+    const textToRead = applyTone(token.base, token.displayTone);
+    let fileName = pinyinToNumber(textToRead);
+    
+    let isNeutral = false;
+    if (fileName.endsWith('5')) {
+      isNeutral = true;
+      fileName = fileName.slice(0, -1) + '1'; 
+    }
+
+    if (fileName.startsWith('nve')) fileName = fileName.replace('nve', 'n%C3%BCe');
+    else if (fileName.startsWith('lve')) fileName = fileName.replace('lve', 'l%C3%BCe');
+    else if (fileName.startsWith('nv')) fileName = fileName.replace('nv', 'nu');
+    else if (fileName.startsWith('lv')) fileName = fileName.replace('lv', 'lu');
+    
+    const url = `https://res.cloudinary.com/zopjocdi/video/upload/da-phat-am-tieng-trung/audio/${fileName}.mp3`;
+    
+    const audio = new Audio(url);
+    if (isNeutral) {
+      audio.playbackRate = 1.3;
+      audio.volume = 0.6;
+    } else {
+      audio.playbackRate = 1.25;
+    }
+    
+    // Unlock iOS Safari
+    audio.load();
+    
+    return { audio, text: textToRead };
+  });
+  
   let currentIndex = 0;
   
   const playNext = () => {
@@ -193,39 +231,48 @@ export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus)
     
     const token = tokens[currentIndex];
     if (onProgress) onProgress(currentIndex, token);
+    if (onStatus) onStatus(`Đang đọc: ${sequenceAudios[currentIndex].text}`);
     
-    const textToRead = applyTone(token.base, token.displayTone);
+    // Sử dụng audio đã được pre-load và unlock
+    globalAudio = sequenceAudios[currentIndex].audio;
     
-    // Tốc độ đọc nhanh hơn cho từ ghép
-    playPinyinAudio(textToRead, () => {
+    const handleEnd = () => {
+      if (globalAudio) {
+        globalAudio.ontimeupdate = null;
+        globalAudio.onended = null;
+        globalAudio.onerror = null;
+      }
       currentIndex++;
-      // Phát ngay lập tức khi file kết thúc
       playNext();
-    }, onStatus);
+    };
+    
+    globalAudio.onended = handleEnd;
+    
+    globalAudio.onerror = () => {
+      console.warn(`Lỗi khi phát audio ${sequenceAudios[currentIndex].text}`);
+      handleEnd(); // Bỏ qua và phát tiếp
+    };
     
     // Hack: Tăng tốc độ phát của audio hiện tại để nghe mượt và liền mạch hơn
-    if (globalAudio) {
-      globalAudio.playbackRate = 1.25; 
-      
-      // Hoặc nếu muốn cắt sớm (crossfade/overlap):
-      // Nếu không phải âm cuối, ta ngắt sớm một chút (trước khi kết thúc) để nối âm tiếp theo
-      if (currentIndex < tokens.length - 1) {
-        globalAudio.ontimeupdate = function() {
-          const duration = this.duration || 0.8;
-          // Ngắt sớm 0.2s trước khi kết thúc để nối âm mượt mà
-          const cutTime = Math.max(0.1, duration - 0.2);
-          if (this.currentTime >= cutTime) {
-            this.ontimeupdate = null;
-            // Huỷ onended để tránh gọi 2 lần playNext
-            this.onended = null;
-            currentIndex++;
-            playNext();
-          }
-        };
-      } else {
-        globalAudio.ontimeupdate = null;
-      }
+    if (currentIndex < tokens.length - 1) {
+      globalAudio.ontimeupdate = function() {
+        const duration = this.duration || 0.8;
+        const cutTime = Math.max(0.1, duration - 0.2);
+        if (this.currentTime >= cutTime) {
+          this.ontimeupdate = null;
+          this.onended = null;
+          currentIndex++;
+          playNext();
+        }
+      };
+    } else {
+      globalAudio.ontimeupdate = null;
     }
+    
+    globalAudio.play().catch(error => {
+      console.warn("Autoplay blocked or network error", error);
+      handleEnd();
+    });
   };
   
   playNext();
