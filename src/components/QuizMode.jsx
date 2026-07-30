@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { generateQuizRound, generateRandomQuizRound, generateToneQuizRound, generateTonePairQuizRound, generateSpellingQuizRound } from '../data/quizData';
 import { applyTone, playPinyinAudio, playContinuousSequence, applyToneSandhi } from '../utils/pinyinUtils';
+import { pinyinMatrix } from '../data/pinyinData';
 import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe, Pencil } from 'lucide-react';
 import { useProgress } from '../context/ProgressContext';
 
@@ -96,11 +97,35 @@ export default function QuizMode() {
         updateScore('spellingRules', currentQuestion.ruleId || 'general', isCorrect);
       } else if (currentQuestion.isTonePairMode) {
         updateScore('tonePairs', `${currentQuestion.originalTones[0]}-${currentQuestion.originalTones[1]}`, isCorrect);
-      } else if (mode === 'tone') {
-        updateScore('tones', currentQuestion.correctTone.toString(), isCorrect);
-        updateScore('syllables', `${currentQuestion.correctBase}${currentQuestion.correctTone}`, isCorrect);
       } else {
+        // Cập nhật âm tiết và thanh điệu
         updateScore('syllables', `${currentQuestion.correctBase}${currentQuestion.correctTone}`, isCorrect);
+        if (mode === 'tone') {
+          updateScore('tones', currentQuestion.correctTone.toString(), isCorrect);
+        }
+        
+        // Dò ngược để cập nhật thanh mẫu và vận mẫu
+        let foundInitial = null;
+        let foundFinal = null;
+        
+        // Tìm trong ma trận pinyin
+        for (const initial of Object.keys(pinyinMatrix)) {
+          for (const final of Object.keys(pinyinMatrix[initial])) {
+            if (pinyinMatrix[initial][final] === currentQuestion.correctBase) {
+              foundInitial = initial;
+              foundFinal = final;
+              break;
+            }
+          }
+          if (foundInitial) break;
+        }
+        
+        if (foundInitial && foundInitial !== 'none') {
+          updateScore('initials', foundInitial, isCorrect);
+        }
+        if (foundFinal) {
+          updateScore('finals', foundFinal, isCorrect);
+        }
       }
     }
   };

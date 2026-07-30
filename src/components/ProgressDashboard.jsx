@@ -236,7 +236,7 @@ function DetailsModal({ level, progress, onClose }) {
                   <div className="flex flex-wrap gap-2">
                     {itemsByCategory[cat].map(item => (
                       <span key={item} className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-bold rounded-lg border border-blue-100">
-                        {item}
+                        {item === 'general' ? 'Quy tắc tổng quát' : item}
                       </span>
                     ))}
                   </div>
