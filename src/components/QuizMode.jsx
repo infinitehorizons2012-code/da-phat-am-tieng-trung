@@ -48,7 +48,7 @@ export default function QuizMode() {
       // Logic phát 2 âm ghép nối tiếp có biến điệu
       const baseTokens = currentQuestion.correctWord.map((base, idx) => ({
         base,
-        tone: currentQuestion.correctTones[idx],
+        tone: currentQuestion.originalTones[idx],
         displayTone: currentQuestion.correctTones[idx]
       }));
       
@@ -202,10 +202,10 @@ export default function QuizMode() {
         <div className="w-full md:w-2/3 flex flex-col">
           <div className="mb-6">
             <h3 className="text-lg font-black text-slate-800 uppercase">
-              {mode === 'tone' ? 'Chọn thanh điệu chính xác:' : mode === 'tonepair' ? 'Chọn cặp thanh điệu gốc:' : 'Chọn phiên âm Pinyin đúng:'}
+              {mode === 'tone' ? 'Chọn thanh điệu chính xác:' : mode === 'tonepair' ? 'Chọn cặp thanh điệu đúng:' : 'Chọn phiên âm Pinyin đúng:'}
             </h3>
             <p className="text-xs text-slate-400 font-medium italic">
-              {mode === 'tone' ? 'Mẹo: nghe kỹ ngữ điệu cao/thấp để xác định.' : mode === 'tonepair' ? 'Lưu ý: Bạn phải chọn thanh điệu GỐC (chính tả) của từ ghép, không phải âm biến điệu.' : 'Lắng nghe kỹ để phân biệt các âm gần giống nhau.'}
+              {mode === 'tone' ? 'Mẹo: nghe kỹ ngữ điệu cao/thấp để xác định.' : mode === 'tonepair' ? 'Lưu ý: Chọn thanh điệu THỰC TẾ mà bạn nghe được (sau khi biến điệu).' : 'Lắng nghe kỹ để phân biệt các âm gần giống nhau.'}
             </p>
           </div>
 
@@ -267,14 +267,8 @@ export default function QuizMode() {
                 {currentQuestion.isTonePairMode && (
                   <div className="mt-3 text-sm flex flex-col gap-1 border-t border-current/20 pt-3">
                     {(() => {
-                      const baseTokens = currentQuestion.correctWord.map((base, idx) => ({
-                        base,
-                        tone: currentQuestion.correctTones[idx],
-                        displayTone: currentQuestion.correctTones[idx]
-                      }));
-                      const sandhiTokens = applyToneSandhi(baseTokens);
-                      const originalStr = baseTokens.map(t => applyTone(t.base, t.tone)).join(' ');
-                      const pronouncedStr = sandhiTokens.map(t => applyTone(t.base, t.displayTone)).join(' ');
+                      const originalStr = currentQuestion.correctWord.map((b, i) => applyTone(b, currentQuestion.originalTones[i])).join(' ');
+                      const pronouncedStr = currentQuestion.correctWord.map((b, i) => applyTone(b, currentQuestion.correctTones[i])).join(' ');
                       
                       return (
                         <>

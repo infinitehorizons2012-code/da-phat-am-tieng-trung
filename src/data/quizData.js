@@ -187,34 +187,34 @@ export const generateToneQuizRound = (numQuestions = 10) => {
 // Dữ liệu các từ ghép (đặc biệt chú trọng biến điệu)
 const tonePairWords = [
   // 3+3 -> 2+3
-  { word: ['ni', 'hao'], tones: [3, 3] },
-  { word: ['ke', 'yi'], tones: [3, 3] },
-  { word: ['lao', 'ban'], tones: [3, 3] },
-  { word: ['shou', 'biao'], tones: [3, 3] },
-  { word: ['yu', 'san'], tones: [3, 3] },
+  { word: ['ni', 'hao'], tones: [3, 3], sandhiTones: [2, 3] },
+  { word: ['ke', 'yi'], tones: [3, 3], sandhiTones: [2, 3] },
+  { word: ['lao', 'ban'], tones: [3, 3], sandhiTones: [2, 3] },
+  { word: ['shou', 'biao'], tones: [3, 3], sandhiTones: [2, 3] },
+  { word: ['yu', 'san'], tones: [3, 3], sandhiTones: [2, 3] },
   
   // Biến điệu của "yi"
-  { word: ['yi', 'ge'], tones: [1, 4] },
-  { word: ['yi', 'tian'], tones: [1, 1] },
-  { word: ['yi', 'nian'], tones: [1, 2] },
-  { word: ['yi', 'qi'], tones: [1, 3] },
-  { word: ['yi', 'kuai'], tones: [1, 4] },
+  { word: ['yi', 'ge'], tones: [1, 4], sandhiTones: [2, 4] },
+  { word: ['yi', 'tian'], tones: [1, 1], sandhiTones: [4, 1] },
+  { word: ['yi', 'nian'], tones: [1, 2], sandhiTones: [4, 2] },
+  { word: ['yi', 'qi'], tones: [1, 3], sandhiTones: [4, 3] },
+  { word: ['yi', 'kuai'], tones: [1, 4], sandhiTones: [2, 4] },
   
   // Biến điệu của "bu"
-  { word: ['bu', 'shi'], tones: [4, 4] },
-  { word: ['bu', 'dui'], tones: [4, 4] },
-  { word: ['bu', 'hao'], tones: [4, 3] },
-  { word: ['bu', 'mang'], tones: [4, 2] },
+  { word: ['bu', 'shi'], tones: [4, 4], sandhiTones: [2, 4] },
+  { word: ['bu', 'dui'], tones: [4, 4], sandhiTones: [2, 4] },
+  { word: ['bu', 'hao'], tones: [4, 3], sandhiTones: [4, 3] },
+  { word: ['bu', 'mang'], tones: [4, 2], sandhiTones: [4, 2] },
   
   // Các cặp không có biến điệu phổ biến
-  { word: ['zhong', 'guo'], tones: [1, 2] },
-  { word: ['xue', 'xiao'], tones: [2, 4] },
-  { word: ['ming', 'tian'], tones: [2, 1] },
-  { word: ['dian', 'nao'], tones: [4, 3] },
-  { word: ['han', 'yu'], tones: [4, 3] },
-  { word: ['chi', 'fan'], tones: [1, 4] },
-  { word: ['jie', 'jie'], tones: [3, 5] },
-  { word: ['lao', 'shi'], tones: [3, 1] }
+  { word: ['zhong', 'guo'], tones: [1, 2], sandhiTones: [1, 2] },
+  { word: ['xue', 'xiao'], tones: [2, 4], sandhiTones: [2, 4] },
+  { word: ['ming', 'tian'], tones: [2, 1], sandhiTones: [2, 1] },
+  { word: ['dian', 'nao'], tones: [4, 3], sandhiTones: [4, 3] },
+  { word: ['han', 'yu'], tones: [4, 3], sandhiTones: [4, 3] },
+  { word: ['chi', 'fan'], tones: [1, 4], sandhiTones: [1, 4] },
+  { word: ['jie', 'jie'], tones: [3, 5], sandhiTones: [3, 5] },
+  { word: ['lao', 'shi'], tones: [3, 1], sandhiTones: [3, 1] }
 ];
 
 // Hàm tạo 10 câu hỏi để nghe cặp thanh điệu
@@ -223,7 +223,10 @@ export const generateTonePairQuizRound = (numQuestions = 10) => {
   
   for (let i = 0; i < numQuestions; i++) {
     const correctWord = tonePairWords[Math.floor(Math.random() * tonePairWords.length)];
-    const correctTones = correctWord.tones;
+    
+    // Yêu cầu mới: Đáp án đúng phải là thanh ĐÃ BIẾN ĐIỆU (những gì người dùng nghe được)
+    const originalTones = correctWord.tones;
+    const pronouncedTones = correctWord.sandhiTones || correctWord.tones;
     
     const formatLabel = (t) => {
       if (t === 1) return '1st';
@@ -235,7 +238,7 @@ export const generateTonePairQuizRound = (numQuestions = 10) => {
     };
     
     const options = [
-      { tones: correctTones, label: `${formatLabel(correctTones[0])} + ${formatLabel(correctTones[1])}`, isCorrect: true }
+      { tones: pronouncedTones, label: `${formatLabel(pronouncedTones[0])} + ${formatLabel(pronouncedTones[1])}`, isCorrect: true }
     ];
     
     // Sinh ra 3 đáp án sai
@@ -252,7 +255,8 @@ export const generateTonePairQuizRound = (numQuestions = 10) => {
     questions.push({
       id: i + 1,
       correctWord: correctWord.word, // mảng 2 chữ pinyin base
-      correctTones: correctTones,    // mảng 2 số
+      originalTones: originalTones,  // mảng 2 số (gốc) dùng cho giải thích
+      correctTones: pronouncedTones, // mảng 2 số (biến điệu) dùng làm đáp án đúng
       options: shuffledOptions,
       isTonePairMode: true
     });
