@@ -44,6 +44,13 @@ export const commonDictionary = {
   "bu4 pa4": "不怕 (Không sợ)",
   "bu4 tong2": "不同 (Không giống)",
   "bu4 qu4": "不去 (Không đi)",
+  
+  // Các từ sửa lỗi cập nhật
+  "hua1 ping2": "花瓶 (Bình hoa)",
+  "jia1 ren2": "家人 (Người nhà)",
+  "hei1 ban3": "黑板 (Bảng đen)",
+  "nan2 nu3": "男女 (Nam nữ)",
+  "kao3 shi4": "考试 (Thi cử/Bài kiểm tra)",
 
   // Các từ 3+3 khác
   "hen3 hao3": "很好 (Rất tốt)",

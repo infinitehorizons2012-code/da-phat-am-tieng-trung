@@ -263,12 +263,12 @@ export const tonePairWords = [
   // 1-2
   { word: ['zhong', 'guo'], tones: [1, 2], sandhiTones: [1, 2] },
   { word: ['xin', 'nian'], tones: [1, 2], sandhiTones: [1, 2] },
-  { word: ['gong', 'zuo'], tones: [1, 2], sandhiTones: [1, 2] },
   { word: ['gong', 'yuan'], tones: [1, 2], sandhiTones: [1, 2] },
-  { word: ['jing', 'cha'], tones: [1, 2], sandhiTones: [1, 2] },
+  { word: ['hua', 'ping'], tones: [1, 2], sandhiTones: [1, 2] },
+  { word: ['jia', 'ren'], tones: [1, 2], sandhiTones: [1, 2] },
 
   // 1-3
-  { word: ['pao', 'bu'], tones: [1, 3], sandhiTones: [1, 3] },
+  { word: ['hei', 'ban'], tones: [1, 3], sandhiTones: [1, 3] },
   { word: ['jing', 'li'], tones: [1, 3], sandhiTones: [1, 3] },
   { word: ['chu', 'kou'], tones: [1, 3], sandhiTones: [1, 3] },
   { word: ['ying', 'yu'], tones: [1, 3], sandhiTones: [1, 3] },
@@ -300,7 +300,7 @@ export const tonePairWords = [
   // 2-3
   { word: ['niu', 'nai'], tones: [2, 3], sandhiTones: [2, 3] },
   { word: ['ci', 'dian'], tones: [2, 3], sandhiTones: [2, 3] },
-  { word: ['nan', 'hai'], tones: [2, 3], sandhiTones: [2, 3] },
+  { word: ['nan', 'nu'], tones: [2, 3], sandhiTones: [2, 3] },
   { word: ['ping', 'guo'], tones: [2, 3], sandhiTones: [2, 3] },
 
   // 2-4
@@ -338,7 +338,7 @@ export const tonePairWords = [
   { word: ['hen', 'hao'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
 
   // 3-4
-  { word: ['dian', 'nao'], tones: [3, 4], sandhiTones: [3, 4] },
+  { word: ['kao', 'shi'], tones: [3, 4], sandhiTones: [3, 4] },
   { word: ['hao', 'kan'], tones: [3, 4], sandhiTones: [3, 4] },
   { word: ['nu', 'li'], tones: [3, 4], sandhiTones: [3, 4] },
   { word: ['zhun', 'bei'], tones: [3, 4], sandhiTones: [3, 4] },
