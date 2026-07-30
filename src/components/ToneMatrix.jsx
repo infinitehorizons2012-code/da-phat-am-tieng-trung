@@ -6,6 +6,7 @@ import { Volume2, Info } from 'lucide-react';
 export default function ToneMatrix() {
   const [activeCell, setActiveCell] = useState(null); // { row, col }
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioSource, setAudioSource] = useState('');
 
   const handleCellClick = (cellData) => {
     // Nếu đang phát cùng ô đó thì dừng
@@ -13,11 +14,13 @@ export default function ToneMatrix() {
       stopAudio();
       setIsPlaying(false);
       setActiveCell(null);
+      setAudioSource('');
       return;
     }
 
     setActiveCell({ row: cellData.row, col: cellData.col });
     setIsPlaying(true);
+    setAudioSource('Đang kết nối...');
 
     playContinuousSequence(
       cellData.tokens,
@@ -25,6 +28,10 @@ export default function ToneMatrix() {
       () => { // onComplete
         setIsPlaying(false);
         setActiveCell(null);
+        setAudioSource('');
+      },
+      (source) => {
+        setAudioSource(source);
       }
     );
   };
@@ -40,6 +47,15 @@ export default function ToneMatrix() {
             <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Giao diện ma trận âm điệu</h2>
           </div>
           <p className="text-slate-500 text-sm">Chọn từng ô thanh điệu bất kỳ để xem phân tích và luyện nghe giọng bản địa.</p>
+          {audioSource && (
+            <div className="mt-2 text-xs font-bold text-blue-600 flex items-center gap-1.5 bg-blue-50 w-fit px-2 py-1 rounded-md border border-blue-100">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              </span>
+              Nguồn âm thanh: {audioSource}
+            </div>
+          )}
         </div>
         
         <div className="flex gap-4 text-xs font-semibold text-slate-500">

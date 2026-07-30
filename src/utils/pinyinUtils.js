@@ -211,7 +211,7 @@ export const applyToneSandhi = (tokens) => {
 };
 
 // Hàm phát âm liên tục (rút ngắn khoảng cách giữa các âm tiết)
-export const playContinuousSequence = (tokens, onProgress, onComplete) => {
+export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus) => {
   stopAudio();
   
   let currentIndex = 0;
@@ -230,9 +230,9 @@ export const playContinuousSequence = (tokens, onProgress, onComplete) => {
     // Tốc độ đọc nhanh hơn cho từ ghép
     playPinyinAudio(textToRead, () => {
       currentIndex++;
-      // Phát ngay lập tức khi file kết thúc (không thêm setTimeout)
+      // Phát ngay lập tức khi file kết thúc
       playNext();
-    });
+    }, onStatus);
     
     // Hack: Tăng tốc độ phát của audio hiện tại để nghe mượt và liền mạch hơn
     if (currentAudio) {
@@ -242,11 +242,11 @@ export const playContinuousSequence = (tokens, onProgress, onComplete) => {
       // Nếu không phải âm cuối, ta ngắt sớm một chút (trước khi kết thúc) để nối âm tiếp theo
       if (currentIndex < tokens.length - 1) {
         currentAudio.addEventListener('timeupdate', function onTimeUpdate() {
-          // Các file mp3 gốc thường dài ~0.7s - 0.9s, ta cắt ở 0.45s để nối cho sát
-          if (this.currentTime >= 0.45) {
+          const duration = this.duration || 0.8;
+          // Ngắt sớm 0.2s trước khi kết thúc để nối âm mượt mà
+          const cutTime = Math.max(0.1, duration - 0.2);
+          if (this.currentTime >= cutTime) {
             this.removeEventListener('timeupdate', onTimeUpdate);
-            // Hủy sự kiện ended cũ để không bị double call
-            this.onended = null; 
             currentIndex++;
             playNext();
           }
