@@ -69,8 +69,6 @@ export default function ProgressDashboard() {
   const overallProgress = calculateOverallProgress();
 
   // --- LOGIC CHO MODAL VÒNG TRÒN DƯỚI CÙNG (NHÓM THEO LEVEL) ---
-  const [selectedLevel, setSelectedLevel] = useState(null);
-  
   const getItemsForLevel = (level) => {
     const items = [];
     if (!progress) return items;
