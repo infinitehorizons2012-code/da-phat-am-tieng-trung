@@ -45,7 +45,7 @@ export const pinyinMatrix = {
     'u': 'fu'
   },
   'd': {
-    'a': 'da', 'e': 'de', 'ai': 'dai', 'ei': 'dei', 'ao': 'dao', 'ou': 'dou', 'an': 'dan', 'en': 'den', 'ang': 'dang', 'eng': 'deng', 'ong': 'dong',
+    'a': 'da', 'e': 'de', 'ai': 'dai', 'ei': 'dei', 'ao': 'dao', 'ou': 'dou', 'an': 'dan', 'ang': 'dang', 'eng': 'deng', 'ong': 'dong',
     'i': 'di', 'ia': 'dia', 'ie': 'die', 'iao': 'diao', 'iu': 'diu', 'ian': 'dian', 'ing': 'ding',
     'u': 'du', 'uo': 'duo', 'ui': 'dui', 'uan': 'duan', 'un': 'dun'
   },
