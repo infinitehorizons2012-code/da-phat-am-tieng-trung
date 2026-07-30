@@ -62,7 +62,8 @@ export default function QuizMode() {
     }
   };
 
-  // Tự động phát âm thanh khi chuyển câu
+  // Tự động phát âm thanh khi chuyển câu (Đã tắt theo yêu cầu)
+  /*
   useEffect(() => {
     if (currentQuestion && selectedOption === null) {
       // Delay chút để UI render xong rồi mới phát âm
@@ -72,6 +73,7 @@ export default function QuizMode() {
       return () => clearTimeout(timer);
     }
   }, [currentIdx, currentQuestion]);
+  */
 
   const handleSelect = (index, isCorrect) => {
     if (selectedOption !== null) return; // Đã chọn rồi thì không cho chọn lại
