@@ -145,8 +145,7 @@ export const generateQuizRound = (numQuestions = 10, progress = null) => {
   
   return questions;
 };
-// Loại bỏ trùng lặp nếu có
-const uniqueSyllables = [...new Set(allValidSyllables)];
+// Loại bỏ trùng lặp nếu có (đã khai báo ở trên)
 
 // Tạo sẵn mảng 1632 tổ hợp âm tiết + thanh điệu
 const allSyllableTones = [];
