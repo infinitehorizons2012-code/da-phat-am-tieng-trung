@@ -57,6 +57,9 @@ export const confusingSets = [
   ['ju', 'qu']
 ];
 
+import { pinyinMatrix } from './pinyinData';
+
+const allValidSyllables = [];
 const reverseMap = {};
 for (const initial in pinyinMatrix) {
   for (const final in pinyinMatrix[initial]) {
