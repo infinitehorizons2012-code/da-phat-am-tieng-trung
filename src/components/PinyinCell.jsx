@@ -1,9 +1,12 @@
 import React from 'react';
 import { applyTone, playPinyinAudio } from '../utils/pinyinUtils';
 import { Volume2, X } from 'lucide-react';
+import { useProgress } from '../context/ProgressContext';
+import TreeIcon from './TreeIcon';
 
 export default function PinyinCell({ initial, final, syllable, onActivate, onClose, isActive, isPlaying, listenCount, onTonePlayed }) {
   const [audioSource, setAudioSource] = React.useState('');
+  const { getLevel } = useProgress();
 
   if (!syllable) {
     return <td className="pinyin-cell empty" />;
@@ -78,17 +81,21 @@ export default function PinyinCell({ initial, final, syllable, onActivate, onClo
 
           {/* Tone Buttons */}
           <div className="flex gap-2 p-3 sm:p-4 bg-white">
-            {tones.map(t => (
-              <button 
-                key={t.num} 
-                className="flex flex-col items-center justify-center min-w-[3rem] h-14 sm:w-14 sm:h-16 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors border border-slate-100 hover:border-rose-200 hover:text-rose-600 group" 
-                onClick={(e) => handleToneClick(e, t.num)}
-                title={`Thanh ${t.num}`}
-              >
-                <span className="text-lg sm:text-xl font-black text-slate-700 group-hover:text-rose-600 leading-none mb-1">{t.label}</span>
-                <Volume2 size={14} className="text-slate-300 group-hover:text-rose-400" />
-              </button>
-            ))}
+            {tones.map(t => {
+              const level = getLevel('syllables', syllable + t.num);
+              return (
+                <button 
+                  key={t.num} 
+                  className="relative flex flex-col items-center justify-center min-w-[3.5rem] h-16 sm:w-16 sm:h-20 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors border border-slate-100 hover:border-rose-200 hover:text-rose-600 group" 
+                  onClick={(e) => handleToneClick(e, t.num)}
+                  title={`Thanh ${t.num}`}
+                >
+                  <TreeIcon level={level} className="absolute top-1 right-1 scale-75" />
+                  <span className="text-lg sm:text-xl font-black text-slate-700 group-hover:text-rose-600 leading-none mb-1 mt-2">{t.label}</span>
+                  <Volume2 size={14} className="text-slate-300 group-hover:text-rose-400" />
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

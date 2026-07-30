@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { toneMatrixData, matrixRowHeaders, matrixColHeaders } from '../data/toneMatrixData';
 import { playContinuousSequence, stopAudio } from '../utils/pinyinUtils';
 import { Volume2, Info } from 'lucide-react';
+import { useProgress } from '../context/ProgressContext';
+import TreeIcon from './TreeIcon';
 
 export default function ToneMatrix() {
   const [activeCell, setActiveCell] = useState(null); // { row, col }
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioSource, setAudioSource] = useState('');
+  
+  const { getLevel } = useProgress();
 
   const handleCellClick = (cellData) => {
     // Nếu đang phát cùng ô đó thì dừng
@@ -108,6 +112,7 @@ export default function ToneMatrix() {
                 {row.map((cell, cIndex) => {
                   const isActive = activeCell && activeCell.row === cell.row && activeCell.col === cell.col;
                   const isNeutral = cIndex === 4;
+                  const level = getLevel('tonePairs', `${cell.row}-${cell.col}`);
                   
                   // Style logic based on state
                   let containerClass = "relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer overflow-hidden group min-h-[100px]";
@@ -128,6 +133,8 @@ export default function ToneMatrix() {
                       {isActive && (
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                       )}
+                      
+                      <TreeIcon level={level} className="absolute top-2 left-2" />
                       
                       {/* Biểu tượng phát âm thanh (chỉ hiện khi hover hoặc active) */}
                       {!isActive && (

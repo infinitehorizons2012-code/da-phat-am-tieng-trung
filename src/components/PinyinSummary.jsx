@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { initialsData, finalsData, tonesData } from '../data/summaryData';
+import { useProgress } from '../context/ProgressContext';
+import TreeIcon from './TreeIcon';
 
 export default function PinyinSummary() {
   const [activeTab, setActiveTab] = useState('initials'); // 'initials', 'finals', 'tones'
+  const { getLevel } = useProgress();
 
   const getColorClasses = (colorName) => {
     switch (colorName) {
@@ -69,14 +72,18 @@ export default function PinyinSummary() {
                     {group.title} <span className="text-xs font-normal">({group.chinese})</span>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    {group.items.map((item, i) => (
-                      <div 
-                        key={i} 
-                        className={`w-14 h-12 flex items-center justify-center text-xl font-medium rounded-lg border ${getColorClasses(group.color)}`}
-                      >
-                        {item}
-                      </div>
-                    ))}
+                    {group.items.map((item, i) => {
+                      const level = getLevel('initials', item);
+                      return (
+                        <div 
+                          key={i} 
+                          className={`w-14 h-14 relative flex flex-col items-center justify-center text-xl font-medium rounded-lg border ${getColorClasses(group.color)}`}
+                        >
+                          <span className="mb-0.5">{item}</span>
+                          <TreeIcon level={level} className="absolute bottom-1 right-1" />
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -105,14 +112,18 @@ export default function PinyinSummary() {
                     {group.desc && <span className="text-xs font-normal">— {group.desc}</span>}
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    {group.items.map((item, i) => (
-                      <div 
-                        key={i} 
-                        className={`h-12 px-5 flex items-center justify-center text-xl font-medium rounded-lg border ${getColorClasses(group.color)}`}
-                      >
-                        {item}
-                      </div>
-                    ))}
+                    {group.items.map((item, i) => {
+                      const level = getLevel('finals', item);
+                      return (
+                        <div 
+                          key={i} 
+                          className={`h-14 px-5 relative flex items-center justify-center text-xl font-medium rounded-lg border ${getColorClasses(group.color)}`}
+                        >
+                          <span>{item}</span>
+                          <TreeIcon level={level} className="absolute bottom-1 right-1" />
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -136,17 +147,21 @@ export default function PinyinSummary() {
             <div className="flex flex-col gap-6 ml-4">
               {/* Row 1: Tones Info */}
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                {tonesData.map((tone) => (
-                  <div key={tone.number} className="flex flex-col items-center justify-center p-4 border border-slate-200 rounded-2xl bg-white shadow-sm">
-                    <div className="w-8 h-8 rounded-full bg-rose-800 text-white flex items-center justify-center font-bold mb-3 text-sm">
-                      {tone.number}
+                {tonesData.map((tone) => {
+                  const level = getLevel('tones', tone.number.toString());
+                  return (
+                    <div key={tone.number} className="relative flex flex-col items-center justify-center p-4 border border-slate-200 rounded-2xl bg-white shadow-sm">
+                      <TreeIcon level={level} className="absolute top-4 right-4 scale-125" />
+                      <div className="w-8 h-8 rounded-full bg-rose-800 text-white flex items-center justify-center font-bold mb-3 text-sm">
+                        {tone.number}
+                      </div>
+                      <div className="text-4xl font-serif text-rose-800 mb-2">{tone.pinyin}</div>
+                      <div className="text-xs font-bold text-rose-800 mb-4">Dấu: {tone.mark}</div>
+                      <div className="text-sm font-bold text-slate-700 text-center mb-1">{tone.name}</div>
+                      <div className="text-xs text-slate-500 text-center">{tone.desc}</div>
                     </div>
-                    <div className="text-4xl font-serif text-rose-800 mb-2">{tone.pinyin}</div>
-                    <div className="text-xs font-bold text-rose-800 mb-4">Dấu: {tone.mark}</div>
-                    <div className="text-sm font-bold text-slate-700 text-center mb-1">{tone.name}</div>
-                    <div className="text-xs text-slate-500 text-center">{tone.desc}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Row 2: Examples */}

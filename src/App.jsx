@@ -5,9 +5,10 @@ import QuizMode from './components/QuizMode';
 import ToneMatrix from './components/ToneMatrix';
 import PinyinSummary from './components/PinyinSummary';
 import ToneSandhiRules from './components/ToneSandhiRules';
+import ProgressDashboard from './components/ProgressDashboard';
 import LoginModal from './components/LoginModal';
 import { useAuth } from './context/AuthContext';
-import { Volume2, Play, Grid, Headphones, LayoutGrid, BookOpen, Zap, User, LogOut } from 'lucide-react';
+import { Volume2, Play, Grid, Headphones, LayoutGrid, BookOpen, Zap, User, LogOut, TreePine } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('table');
@@ -77,6 +78,13 @@ function App() {
               <Headphones size={16} />
               <span className="hidden sm:inline">Trắc nghiệm</span>
             </button>
+            <button 
+              onClick={() => setActiveTab('progress')}
+              className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'progress' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <TreePine size={16} />
+              <span className="hidden sm:inline">Khu Vườn</span>
+            </button>
           </div>
           
             {/* User Profile / Login */}
@@ -112,13 +120,7 @@ function App() {
         <main className="min-h-0 flex flex-col w-full mx-auto max-w-none overflow-hidden animate-in fade-in duration-300">
           <div className="flex min-h-0 flex-1 flex-col">
             
-            {activeTab === 'summary' ? (
-              <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 flex items-start justify-center">
-                <div className="w-full h-full flex">
-                  <PinyinSummary />
-                </div>
-              </div>
-            ) : activeTab === 'table' ? (
+            {activeTab === 'table' && (
               <>
                 {/* Legend (Chú giải) */}
                 <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4 text-xs font-bold text-slate-500">
@@ -145,27 +147,43 @@ function App() {
                   <PinyinTable />
                 </div>
               </>
-            ) : activeTab === 'sandhi-rules' ? (
+            )}
+            {activeTab === 'summary' && (
+              <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 flex items-start justify-center">
+                <div className="w-full h-full flex">
+                  <PinyinSummary />
+                </div>
+              </div>
+            )}
+            {activeTab === 'sandhi-rules' && (
               <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 flex items-start justify-center">
                 <div className="w-full h-full flex">
                   <ToneSandhiRules />
                 </div>
               </div>
-            ) : activeTab === 'tone-matrix' ? (
+            )}
+            {activeTab === 'tone-matrix' && (
               <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 flex items-start justify-center">
                 <div className="w-full max-w-6xl h-full flex">
                   <ToneMatrix />
                 </div>
               </div>
-            ) : activeTab === 'tone-pair' ? (
+            )}
+            {activeTab === 'tone-pair' && (
               <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 flex items-start justify-center">
                 <div className="w-full max-w-5xl">
                   <TonePairPractice />
                 </div>
               </div>
-            ) : (
+            )}
+            {activeTab === 'quiz' && (
               <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100">
                 <QuizMode />
+              </div>
+            )}
+            {activeTab === 'progress' && (
+              <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100">
+                <ProgressDashboard />
               </div>
             )}
 

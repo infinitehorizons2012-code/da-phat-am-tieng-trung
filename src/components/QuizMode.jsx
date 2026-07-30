@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { generateQuizRound, generateRandomQuizRound, generateToneQuizRound, generateTonePairQuizRound, generateSpellingQuizRound } from '../data/quizData';
 import { applyTone, playPinyinAudio, playContinuousSequence, applyToneSandhi } from '../utils/pinyinUtils';
 import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe, Pencil } from 'lucide-react';
+import { useProgress } from '../context/ProgressContext';
 
 export default function QuizMode() {
   const [mode, setMode] = useState('confusing'); // 'confusing' or 'all'
@@ -11,6 +12,8 @@ export default function QuizMode() {
   const [stats, setStats] = useState({ correct: 0, wrong: 0 });
   const [isFinished, setIsFinished] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const { updateScore } = useProgress();
 
   // Khởi tạo vòng mới
   const startNewRound = (newMode = mode) => {
@@ -85,6 +88,20 @@ export default function QuizMode() {
       setStats(prev => ({ ...prev, correct: prev.correct + 1 }));
     } else {
       setStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+    }
+
+    // Cập nhật điểm lên hệ thống Memrise
+    if (currentQuestion) {
+      if (currentQuestion.isSpellingMode) {
+        updateScore('spellingRules', currentQuestion.ruleId || 'general', isCorrect);
+      } else if (currentQuestion.isTonePairMode) {
+        updateScore('tonePairs', `${currentQuestion.originalTones[0]}-${currentQuestion.originalTones[1]}`, isCorrect);
+      } else if (mode === 'tone') {
+        updateScore('tones', currentQuestion.correctTone.toString(), isCorrect);
+        updateScore('syllables', `${currentQuestion.correctBase}${currentQuestion.correctTone}`, isCorrect);
+      } else {
+        updateScore('syllables', `${currentQuestion.correctBase}${currentQuestion.correctTone}`, isCorrect);
+      }
     }
   };
 
