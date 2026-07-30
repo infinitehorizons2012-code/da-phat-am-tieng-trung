@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { generateQuizRound, generateRandomQuizRound, generateToneQuizRound, generateTonePairQuizRound } from '../data/quizData';
+import { generateQuizRound, generateRandomQuizRound, generateToneQuizRound, generateTonePairQuizRound, generateSpellingQuizRound } from '../data/quizData';
 import { applyTone, playPinyinAudio, playContinuousSequence, applyToneSandhi } from '../utils/pinyinUtils';
-import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe } from 'lucide-react';
+import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe, Pencil } from 'lucide-react';
 
 export default function QuizMode() {
   const [mode, setMode] = useState('confusing'); // 'confusing' or 'all'
@@ -20,6 +20,8 @@ export default function QuizMode() {
       setQuestions(generateToneQuizRound(10));
     } else if (newMode === 'tonepair') {
       setQuestions(generateTonePairQuizRound(10));
+    } else if (newMode === 'spelling') {
+      setQuestions(generateSpellingQuizRound(10));
     } else {
       setQuestions(generateRandomQuizRound(10));
     }
@@ -41,7 +43,7 @@ export default function QuizMode() {
   const currentQuestion = questions[currentIdx];
 
   const playAudio = () => {
-    if (!currentQuestion) return;
+    if (!currentQuestion || currentQuestion.isSpellingMode) return; // Không phát âm trong bài spelling
     setIsPlaying(true);
     
     if (currentQuestion.isTonePairMode) {
@@ -166,6 +168,14 @@ export default function QuizMode() {
             <span className="hidden sm:inline">Cặp từ ghép (Biến điệu)</span>
             <span className="sm:hidden">Từ ghép</span>
           </button>
+          <button 
+            onClick={() => handleModeChange('spelling')}
+            className={`whitespace-nowrap flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'spelling' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Pencil size={14} />
+            <span className="hidden sm:inline">Quy tắc chính tả</span>
+            <span className="sm:hidden">Chính tả</span>
+          </button>
         </div>
 
         <div className="font-bold text-slate-500 text-sm w-full sm:w-auto text-right">
@@ -174,40 +184,52 @@ export default function QuizMode() {
       </div>
       <div className="w-full bg-slate-100 h-2">
         <div 
-          className={`${mode === 'all' ? 'bg-purple-500' : mode === 'tone' ? 'bg-emerald-500' : mode === 'tonepair' ? 'bg-amber-500' : 'bg-blue-500'} h-2 transition-all duration-300`} 
+          className={`${mode === 'all' ? 'bg-purple-500' : mode === 'tone' ? 'bg-emerald-500' : mode === 'tonepair' ? 'bg-amber-500' : mode === 'spelling' ? 'bg-rose-500' : 'bg-blue-500'} h-2 transition-all duration-300`} 
           style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
         ></div>
       </div>
 
       <div className="flex flex-col md:flex-row p-6 gap-6 md:gap-8 items-stretch">
-        {/* Left Panel (Audio Playback) */}
-        <div className={`w-full md:w-1/3 ${mode === 'all' ? 'bg-purple-600' : mode === 'tone' ? 'bg-emerald-600' : mode === 'tonepair' ? 'bg-amber-500' : 'bg-blue-600'} rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group cursor-pointer transition-colors`} onClick={playAudio}>
+        {/* Left Panel (Audio Playback / Formula) */}
+        <div className={`w-full md:w-1/3 ${mode === 'all' ? 'bg-purple-600' : mode === 'tone' ? 'bg-emerald-600' : mode === 'tonepair' ? 'bg-amber-500' : mode === 'spelling' ? 'bg-rose-500' : 'bg-blue-600'} rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group ${!currentQuestion.isSpellingMode ? 'cursor-pointer' : ''} transition-colors`} onClick={!currentQuestion.isSpellingMode ? playAudio : undefined}>
           <div className="absolute top-4 bg-white/20 px-3 py-1 rounded-full text-white text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-            {mode === 'tone' ? 'TONE DRILL' : mode === 'tonepair' ? 'SANDHI DRILL' : 'PINYIN DRILL'}
+            {mode === 'tone' ? 'TONE DRILL' : mode === 'tonepair' ? 'SANDHI DRILL' : mode === 'spelling' ? 'SPELLING DRILL' : 'PINYIN DRILL'}
           </div>
           
-          <div className={`w-24 h-24 rounded-full border-4 border-white/20 flex items-center justify-center mb-6 transition-transform duration-300 ${isPlaying ? 'scale-110 bg-white/10' : ''}`}>
-            <Headphones size={40} className="text-white" />
-          </div>
-          
-          <p className="text-white/80 text-sm mb-6 text-center">Nhấp loa hoặc khung này để nghe lại</p>
-          
-          <button 
-            className={`w-16 h-16 rounded-full bg-white flex items-center justify-center ${mode === 'all' ? 'text-purple-600' : mode === 'tone' ? 'text-emerald-600' : mode === 'tonepair' ? 'text-amber-600' : 'text-blue-600'} hover:scale-105 transition-all shadow-lg ${isPlaying ? 'animate-pulse' : ''}`}
-            onClick={(e) => { e.stopPropagation(); playAudio(); }}
-          >
-            <Volume2 size={24} className={isPlaying ? 'animate-bounce' : ''} />
-          </button>
+          {currentQuestion.isSpellingMode ? (
+            <div className="flex flex-col items-center justify-center w-full mt-4">
+              <div className="text-white/80 text-sm mb-4">Công thức viết:</div>
+              <div className="text-4xl md:text-5xl font-mono font-black text-white text-center drop-shadow-md tracking-wider">
+                {currentQuestion.formula}
+              </div>
+              <div className="text-6xl text-white mt-4 font-black">?</div>
+            </div>
+          ) : (
+            <>
+              <div className={`w-24 h-24 rounded-full border-4 border-white/20 flex items-center justify-center mb-6 transition-transform duration-300 ${isPlaying ? 'scale-110 bg-white/10' : ''}`}>
+                <Headphones size={40} className="text-white" />
+              </div>
+              
+              <p className="text-white/80 text-sm mb-6 text-center">Nhấp loa hoặc khung này để nghe lại</p>
+              
+              <button 
+                className={`w-16 h-16 rounded-full bg-white flex items-center justify-center ${mode === 'all' ? 'text-purple-600' : mode === 'tone' ? 'text-emerald-600' : mode === 'tonepair' ? 'text-amber-600' : 'text-blue-600'} hover:scale-105 transition-all shadow-lg ${isPlaying ? 'animate-pulse' : ''}`}
+                onClick={(e) => { e.stopPropagation(); playAudio(); }}
+              >
+                <Volume2 size={24} className={isPlaying ? 'animate-bounce' : ''} />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Right Panel (Options) */}
         <div className="w-full md:w-2/3 flex flex-col">
           <div className="mb-6">
             <h3 className="text-lg font-black text-slate-800 uppercase">
-              {mode === 'tone' ? 'Chọn thanh điệu chính xác:' : mode === 'tonepair' ? 'Chọn cặp thanh điệu đúng:' : 'Chọn phiên âm Pinyin đúng:'}
+              {mode === 'tone' ? 'Chọn thanh điệu chính xác:' : mode === 'tonepair' ? 'Chọn cặp thanh điệu đúng:' : mode === 'spelling' ? 'Cách viết Pinyin chuẩn là:' : 'Chọn phiên âm Pinyin đúng:'}
             </h3>
             <p className="text-xs text-slate-400 font-medium italic">
-              {mode === 'tone' ? 'Mẹo: nghe kỹ ngữ điệu cao/thấp để xác định.' : mode === 'tonepair' ? 'Lưu ý: Chọn thanh điệu THỰC TẾ mà bạn nghe được (sau khi biến điệu).' : 'Lắng nghe kỹ để phân biệt các âm gần giống nhau.'}
+              {mode === 'tone' ? 'Mẹo: nghe kỹ ngữ điệu cao/thấp để xác định.' : mode === 'tonepair' ? 'Lưu ý: Chọn thanh điệu THỰC TẾ mà bạn nghe được (sau khi biến điệu).' : mode === 'spelling' ? 'Nhớ lại các quy tắc chính tả vừa học.' : 'Lắng nghe kỹ để phân biệt các âm gần giống nhau.'}
             </p>
           </div>
 
@@ -221,6 +243,10 @@ export default function QuizMode() {
               ) : currentQuestion.isTonePairMode ? (
                 <div className="flex items-center justify-center w-full">
                   <span className="font-sans text-xl">{opt.label}</span>
+                </div>
+              ) : currentQuestion.isSpellingMode ? (
+                <div className="flex items-center justify-center w-full">
+                  <span className="font-sans text-xl font-bold tracking-widest">{opt.text}</span>
                 </div>
               ) : applyTone(opt.base, opt.tone);
               
@@ -283,6 +309,13 @@ export default function QuizMode() {
                         </>
                       );
                     })()}
+                  </div>
+                )}
+                
+                {/* Hiển thị giải thích cho luật chính tả */}
+                {currentQuestion.isSpellingMode && currentQuestion.explanation && (
+                  <div className="mt-3 text-sm flex flex-col gap-1 border-t border-current/20 pt-3">
+                    <div><span className="font-bold opacity-80">Giải thích:</span> {currentQuestion.explanation}</div>
                   </div>
                 )}
               </div>
