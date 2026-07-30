@@ -132,6 +132,8 @@ export default function ProgressDashboard() {
     return count;
   };
 
+  const [activeTab, setActiveTab] = useState('categories'); // 'categories', 'levels'
+
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col h-full bg-slate-100 rounded-2xl shadow-sm border border-slate-200 overflow-hidden my-4">
       <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
@@ -149,31 +151,53 @@ export default function ProgressDashboard() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex border-b border-slate-200 bg-white">
+        <button
+          className={`flex-1 py-4 text-center font-bold text-sm transition-colors ${
+            activeTab === 'categories' ? 'text-rose-600 border-b-2 border-rose-600 bg-rose-50/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+          }`}
+          onClick={() => setActiveTab('categories')}
+        >
+          Theo Danh Mục
+        </button>
+        <button
+          className={`flex-1 py-4 text-center font-bold text-sm transition-colors ${
+            activeTab === 'levels' ? 'text-rose-600 border-b-2 border-rose-600 bg-rose-50/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+          }`}
+          onClick={() => setActiveTab('levels')}
+        >
+          Phân Loại Hạt / Cây
+        </button>
+      </div>
+
       <div className="p-6 overflow-y-auto hide-scrollbar flex-1 bg-slate-50/50">
         
-        {/* Progress Bars */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <ProgressCard title="Thanh mẫu" percentage={initialProgress} color="bg-rose-500" icon="🔤" catKey="initials" />
-          <ProgressCard title="Vận mẫu" percentage={finalProgress} color="bg-blue-500" icon="🅰️" catKey="finals" />
-          <ProgressCard title="Thanh điệu" percentage={toneProgress} color="bg-amber-500" icon="🎵" catKey="tones" />
-          <ProgressCard title="Ghép vần (Syllables)" percentage={syllableProgress} color="bg-purple-500" icon="🧩" catKey="syllables" />
-          <ProgressCard title="Quy tắc chính tả" percentage={spellingProgress} color="bg-teal-500" icon="📝" catKey="spellingRules" />
-          <ProgressCard title="Quy tắc biến điệu" percentage={sandhiProgress} color="bg-orange-500" icon="⚡" catKey="sandhiRules" />
-          <ProgressCard title="Ma trận âm điệu" percentage={tonePairProgress} color="bg-indigo-500" icon="📊" catKey="tonePairs" />
-        </div>
-
-        {/* Garden Stats */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-          <h3 className="text-lg font-black text-slate-800 mb-6 uppercase tracking-wider text-center">Thống Kê Vườn Cây</h3>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-            <StatBox level={0} count={getTreeCountByLevel(0)} onClick={() => setSelectedLevel(0)} />
-            <StatBox level={1} count={getTreeCountByLevel(1)} onClick={() => setSelectedLevel(1)} />
-            <StatBox level={2} count={getTreeCountByLevel(2)} onClick={() => setSelectedLevel(2)} />
-            <StatBox level={3} count={getTreeCountByLevel(3)} onClick={() => setSelectedLevel(3)} />
-            <StatBox level={4} count={getTreeCountByLevel(4)} onClick={() => setSelectedLevel(4)} />
+        {activeTab === 'categories' ? (
+          /* Progress Bars */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <ProgressCard title="Thanh mẫu" percentage={initialProgress} color="bg-rose-500" icon="🔤" catKey="initials" />
+            <ProgressCard title="Vận mẫu" percentage={finalProgress} color="bg-blue-500" icon="🅰️" catKey="finals" />
+            <ProgressCard title="Thanh điệu" percentage={toneProgress} color="bg-amber-500" icon="🎵" catKey="tones" />
+            <ProgressCard title="Ghép vần (Syllables)" percentage={syllableProgress} color="bg-purple-500" icon="🧩" catKey="syllables" />
+            <ProgressCard title="Quy tắc chính tả" percentage={spellingProgress} color="bg-teal-500" icon="📝" catKey="spellingRules" />
+            <ProgressCard title="Quy tắc biến điệu" percentage={sandhiProgress} color="bg-orange-500" icon="⚡" catKey="sandhiRules" />
+            <ProgressCard title="Ma trận âm điệu" percentage={tonePairProgress} color="bg-indigo-500" icon="📊" catKey="tonePairs" />
           </div>
-        </div>
+        ) : (
+          /* Garden Stats */
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 className="text-lg font-black text-slate-800 mb-6 uppercase tracking-wider text-center">Thống Kê Vườn Cây</h3>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+              <StatBox level={0} count={getTreeCountByLevel(0)} onClick={() => setSelectedLevel(0)} />
+              <StatBox level={1} count={getTreeCountByLevel(1)} onClick={() => setSelectedLevel(1)} />
+              <StatBox level={2} count={getTreeCountByLevel(2)} onClick={() => setSelectedLevel(2)} />
+              <StatBox level={3} count={getTreeCountByLevel(3)} onClick={() => setSelectedLevel(3)} />
+              <StatBox level={4} count={getTreeCountByLevel(4)} onClick={() => setSelectedLevel(4)} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* MODAL CHI TIẾT THEO LEVEL (Vòng tròn) */}
