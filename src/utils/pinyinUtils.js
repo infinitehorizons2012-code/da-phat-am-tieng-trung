@@ -46,7 +46,7 @@ const toneMarksReverse = {
 };
 
 export const pinyinToNumber = (pinyin) => {
-  let tone = 1; // Mặc định là thanh 1 nếu là thanh nhẹ (hoặc không có dấu)
+  let tone = 5; // Mặc định là thanh 5 (khinh thanh) nếu không có dấu
   let basePinyin = '';
   for (let i = 0; i < pinyin.length; i++) {
     const char = pinyin[i];
@@ -65,12 +65,9 @@ export const playPinyinAudio = (text, onEnd, onStatus) => {
   
   const fileName = pinyinToNumber(text);
   
-  // Danh sách các máy chủ dự phòng trong trường hợp mạng bị chặn (thường gặp ở VN)
+  // Sử dụng nguồn Cloudinary cá nhân để đảm bảo đầy đủ âm tiết và ổn định
   const cdnList = [
-    { name: 'cdn.jsdelivr', url: `https://cdn.jsdelivr.net/gh/shikangkai/Chinese-Pinyin-Audio@master/Pinyin-Female/${fileName}.mp3` },
-    { name: 'fastly.jsdelivr', url: `https://fastly.jsdelivr.net/gh/shikangkai/Chinese-Pinyin-Audio@master/Pinyin-Female/${fileName}.mp3` },
-    { name: 'gcore.jsdelivr', url: `https://gcore.jsdelivr.net/gh/shikangkai/Chinese-Pinyin-Audio@master/Pinyin-Female/${fileName}.mp3` },
-    { name: 'githubusercontent', url: `https://raw.githubusercontent.com/shikangkai/Chinese-Pinyin-Audio/master/Pinyin-Female/${fileName}.mp3` }
+    { name: 'Cloudinary', url: `https://res.cloudinary.com/zopjocdi/video/upload/da-phat-am-tieng-trung/audio/${fileName}.mp3` }
   ];
   
   let currentTry = 0;
