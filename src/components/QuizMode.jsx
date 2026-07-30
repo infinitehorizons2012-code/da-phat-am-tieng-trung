@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { generateQuizRound, generateRandomQuizRound } from '../data/quizData';
+import { generateQuizRound, generateRandomQuizRound, generateToneQuizRound } from '../data/quizData';
 import { applyTone, playPinyinAudio } from '../utils/pinyinUtils';
 import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe } from 'lucide-react';
 
@@ -16,6 +16,8 @@ export default function QuizMode() {
   const startNewRound = (newMode = mode) => {
     if (newMode === 'confusing') {
       setQuestions(generateQuizRound(10));
+    } else if (newMode === 'tone') {
+      setQuestions(generateToneQuizRound(10));
     } else {
       setQuestions(generateRandomQuizRound(10));
     }
@@ -112,20 +114,30 @@ export default function QuizMode() {
       {/* Top Header / Progress */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-3 border-b border-slate-200 bg-white gap-3">
         
-        <div className="flex bg-slate-100 p-1 rounded-lg w-full sm:w-auto">
+        <div className="flex bg-slate-100 p-1 rounded-lg w-full sm:w-auto overflow-x-auto hide-scrollbar">
           <button 
             onClick={() => handleModeChange('confusing')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'confusing' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`whitespace-nowrap flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'confusing' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <Target size={14} />
-            Âm dễ nhầm lẫn
+            <span className="hidden sm:inline">Âm dễ nhầm lẫn</span>
+            <span className="sm:hidden">Dễ nhầm</span>
           </button>
           <button 
             onClick={() => handleModeChange('all')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'all' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`whitespace-nowrap flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'all' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <Globe size={14} />
-            Tất cả các thanh
+            <span className="hidden sm:inline">Tất cả các thanh</span>
+            <span className="sm:hidden">Tất cả</span>
+          </button>
+          <button 
+            onClick={() => handleModeChange('tone')}
+            className={`whitespace-nowrap flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'tone' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Volume2 size={14} />
+            <span className="hidden sm:inline">Phân biệt thanh điệu</span>
+            <span className="sm:hidden">Thanh điệu</span>
           </button>
         </div>
 
@@ -135,16 +147,16 @@ export default function QuizMode() {
       </div>
       <div className="w-full bg-slate-100 h-2">
         <div 
-          className={`${mode === 'all' ? 'bg-purple-500' : 'bg-blue-500'} h-2 transition-all duration-300`} 
+          className={`${mode === 'all' ? 'bg-purple-500' : mode === 'tone' ? 'bg-emerald-500' : 'bg-blue-500'} h-2 transition-all duration-300`} 
           style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
         ></div>
       </div>
 
       <div className="flex flex-col md:flex-row p-6 gap-6 md:gap-8 items-stretch">
         {/* Left Panel (Audio Playback) */}
-        <div className={`w-full md:w-1/3 ${mode === 'all' ? 'bg-purple-600' : 'bg-blue-600'} rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group cursor-pointer transition-colors`} onClick={playAudio}>
+        <div className={`w-full md:w-1/3 ${mode === 'all' ? 'bg-purple-600' : mode === 'tone' ? 'bg-emerald-600' : 'bg-blue-600'} rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group cursor-pointer transition-colors`} onClick={playAudio}>
           <div className="absolute top-4 bg-white/20 px-3 py-1 rounded-full text-white text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-            Pinyin Drill
+            {mode === 'tone' ? 'TONE DRILL' : 'PINYIN DRILL'}
           </div>
           
           <div className={`w-24 h-24 rounded-full border-4 border-white/20 flex items-center justify-center mb-6 transition-transform duration-300 ${isPlaying ? 'scale-110 bg-white/10' : ''}`}>
@@ -154,7 +166,7 @@ export default function QuizMode() {
           <p className="text-white/80 text-sm mb-6 text-center">Nhấp loa hoặc khung này để nghe lại</p>
           
           <button 
-            className={`w-16 h-16 rounded-full bg-white flex items-center justify-center ${mode === 'all' ? 'text-purple-600' : 'text-blue-600'} hover:scale-105 transition-all shadow-lg ${isPlaying ? 'animate-pulse' : ''}`}
+            className={`w-16 h-16 rounded-full bg-white flex items-center justify-center ${mode === 'all' ? 'text-purple-600' : mode === 'tone' ? 'text-emerald-600' : 'text-blue-600'} hover:scale-105 transition-all shadow-lg ${isPlaying ? 'animate-pulse' : ''}`}
             onClick={(e) => { e.stopPropagation(); playAudio(); }}
           >
             <Volume2 size={24} className={isPlaying ? 'animate-bounce' : ''} />
@@ -164,13 +176,23 @@ export default function QuizMode() {
         {/* Right Panel (Options) */}
         <div className="w-full md:w-2/3 flex flex-col">
           <div className="mb-6">
-            <h3 className="text-lg font-black text-slate-800 uppercase">Chọn phiên âm Pinyin đúng:</h3>
-            <p className="text-xs text-slate-400 font-medium italic">Lắng nghe kỹ để phân biệt các âm gần giống nhau.</p>
+            <h3 className="text-lg font-black text-slate-800 uppercase">
+              {mode === 'tone' ? 'Chọn thanh điệu chính xác:' : 'Chọn phiên âm Pinyin đúng:'}
+            </h3>
+            <p className="text-xs text-slate-400 font-medium italic">
+              {mode === 'tone' ? 'Mẹo: nghe kỹ ngữ điệu cao/thấp để xác định.' : 'Lắng nghe kỹ để phân biệt các âm gần giống nhau.'}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
             {currentQuestion.options.map((opt, idx) => {
-              const displayLabel = applyTone(opt.base, opt.tone);
+              const displayLabel = currentQuestion.isToneMode ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-blue-500 bg-blue-100 rounded text-xl w-8 h-8 flex items-center justify-center shadow-inner font-sans leading-none pb-0.5">{opt.icon}</span>
+                  <span>{opt.label}</span>
+                </div>
+              ) : applyTone(opt.base, opt.tone);
+              
               let btnClass = "border-2 border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50 text-slate-600";
               
               if (isAnswered) {

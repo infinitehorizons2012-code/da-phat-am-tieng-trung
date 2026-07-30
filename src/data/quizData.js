@@ -155,3 +155,32 @@ export const generateRandomQuizRound = (numQuestions = 10) => {
   
   return questions;
 };
+
+// Hàm tạo 10 câu hỏi để nghe phân biệt thanh điệu
+export const generateToneQuizRound = (numQuestions = 10) => {
+  const questions = [];
+  
+  for (let i = 0; i < numQuestions; i++) {
+    const correctIdx = Math.floor(Math.random() * uniqueSyllables.length);
+    const correctSyllable = uniqueSyllables[correctIdx];
+    const correctTone = Math.floor(Math.random() * 4) + 1; // 1-4
+    
+    // Đáp án luôn cố định là 4 thanh
+    const options = [
+      { base: correctSyllable, tone: 1, label: '1st', icon: '→', isCorrect: correctTone === 1 },
+      { base: correctSyllable, tone: 2, label: '2nd', icon: '↗', isCorrect: correctTone === 2 },
+      { base: correctSyllable, tone: 3, label: '3rd', icon: '↘↗', isCorrect: correctTone === 3 },
+      { base: correctSyllable, tone: 4, label: '4th', icon: '↘', isCorrect: correctTone === 4 }
+    ];
+    
+    questions.push({
+      id: i + 1,
+      correctBase: correctSyllable,
+      correctTone: correctTone,
+      options: options,
+      isToneMode: true // flag để render UI đặc biệt
+    });
+  }
+  
+  return questions;
+};
