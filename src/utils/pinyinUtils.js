@@ -63,7 +63,14 @@ export const pinyinToNumber = (pinyin) => {
 export const playPinyinAudio = (text, onEnd, onStatus) => {
   stopAudio();
   
-  const fileName = pinyinToNumber(text);
+  let fileName = pinyinToNumber(text);
+  
+  let isNeutral = false;
+  if (fileName.endsWith('5')) {
+    isNeutral = true;
+    // Fallback to tone 1 audio file for neutral tone
+    fileName = fileName.slice(0, -1) + '1'; 
+  }
   
   // Sử dụng nguồn Cloudinary cá nhân để đảm bảo đầy đủ âm tiết và ổn định
   const cdnList = [
@@ -83,6 +90,11 @@ export const playPinyinAudio = (text, onEnd, onStatus) => {
     if (onStatus) onStatus(cdnList[currentTry].name);
     const url = cdnList[currentTry].url;
     const audio = new Audio(url);
+    
+    if (isNeutral) {
+      audio.playbackRate = 1.3; // Ngắn và nhanh hơn
+      audio.volume = 0.6; // Nhẹ hơn
+    }
     
     // Gán ngay để hàm stopAudio() có thể dừng nếu user bấm nhanh ô khác
     currentAudio = audio;
@@ -204,7 +216,7 @@ export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus)
     const token = tokens[currentIndex];
     if (onProgress) onProgress(currentIndex, token);
     
-    const textToRead = applyTone(token.base, token.displayTone === 5 ? 1 : token.displayTone);
+    const textToRead = applyTone(token.base, token.displayTone);
     
     // Tốc độ đọc nhanh hơn cho từ ghép
     playPinyinAudio(textToRead, () => {
