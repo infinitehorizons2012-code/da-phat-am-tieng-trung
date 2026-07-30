@@ -27,17 +27,16 @@ export default function ProgressDashboard() {
   // Calculate current progress based on max level 3 (Level 4 is bonus/exam)
   const calculateCategoryProgress = (category, totalItemsCount) => {
     if (!progress || !progress[category]) return 0;
-    
     let currentScore = 0;
-    // We iterate through all keys in the category that the user has interacted with
     Object.keys(progress[category]).forEach(key => {
-      currentScore += Math.min(3, progress[category][key]); // Max 3 points per item for completion
+      currentScore += Math.min(3, progress[category][key]);
     });
-    
     const maxScore = totalItemsCount * 3;
     if (maxScore === 0) return 0;
     
-    return Math.round((currentScore / maxScore) * 100);
+    const pct = (currentScore / maxScore) * 100;
+    if (pct > 0 && pct < 1) return pct.toFixed(2);
+    return Math.round(pct);
   };
 
   const calculateOverallProgress = () => {
@@ -55,7 +54,6 @@ export default function ProgressDashboard() {
     const maxScore = totalItems * 3;
     if (maxScore === 0) return 0;
     
-    // Format to 2 decimal places if > 0 and < 1 to show micro progress
     const pct = (currentScore / maxScore) * 100;
     if (pct > 0 && pct < 1) return pct.toFixed(2);
     return Math.round(pct);
@@ -69,6 +67,59 @@ export default function ProgressDashboard() {
   const spellingProgress = calculateCategoryProgress('spellingRules', totalSpellingRules);
   const sandhiProgress = calculateCategoryProgress('sandhiRules', totalSandhiRules);
   const overallProgress = calculateOverallProgress();
+
+  // --- LOGIC CHO MODAL VÒNG TRÒN DƯỚI CÙNG (NHÓM THEO LEVEL) ---
+  const [selectedLevel, setSelectedLevel] = useState(null);
+  
+  const getItemsForLevel = (level) => {
+    const items = [];
+    if (!progress) return items;
+    
+    ['initials', 'finals', 'tones', 'syllables', 'tonePairs', 'spellingRules', 'sandhiRules'].forEach(cat => {
+      if (progress[cat]) {
+        Object.entries(progress[cat]).forEach(([key, val]) => {
+          if (val === level) {
+            items.push({ category: cat, item: key });
+          }
+        });
+      }
+    });
+    return items;
+  };
+
+  // --- LOGIC CHO MODAL CARD PROGRESS (NHÓM THEO THỂ LOẠI) ---
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const getItemsForCategory = (catKey) => {
+    const items = [];
+    if (!progress || !progress[catKey]) return items;
+    
+    Object.entries(progress[catKey]).forEach(([key, val]) => {
+      items.push({ item: key, level: val });
+    });
+    // Sắp xếp theo level giảm dần
+    return items.sort((a, b) => b.level - a.level);
+  };
+
+  const ProgressCard = ({ title, percentage, color, icon, catKey }) => (
+    <div 
+      onClick={() => setSelectedCategory({ title, key: catKey })}
+      className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer active:scale-95"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-lg">
+            {icon}
+          </div>
+          <span className="font-bold text-slate-700">{title}</span>
+        </div>
+        <div className="text-lg font-black text-slate-800">{percentage}%</div>
+      </div>
+      <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${percentage}%` }}></div>
+      </div>
+    </div>
+  );
 
   const getTreeCountByLevel = (level) => {
     if (!progress) return 0;
@@ -84,8 +135,8 @@ export default function ProgressDashboard() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col h-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden my-4">
-      <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+    <div className="w-full max-w-4xl mx-auto flex flex-col h-full bg-slate-100 rounded-2xl shadow-sm border border-slate-200 overflow-hidden my-4">
+      <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
         <div>
           <h2 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
             🌳 Khu Vườn Pinyin Của Bé
@@ -104,13 +155,13 @@ export default function ProgressDashboard() {
         
         {/* Progress Bars */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <ProgressCard title="Thanh mẫu" percentage={initialProgress} color="bg-rose-500" icon="🔤" />
-          <ProgressCard title="Vận mẫu" percentage={finalProgress} color="bg-blue-500" icon="🅰️" />
-          <ProgressCard title="Thanh điệu" percentage={toneProgress} color="bg-amber-500" icon="🎵" />
-          <ProgressCard title="Ghép vần (Syllables)" percentage={syllableProgress} color="bg-purple-500" icon="🧩" />
-          <ProgressCard title="Quy tắc chính tả" percentage={spellingProgress} color="bg-teal-500" icon="📝" />
-          <ProgressCard title="Quy tắc biến điệu" percentage={sandhiProgress} color="bg-orange-500" icon="⚡" />
-          <ProgressCard title="Ma trận âm điệu" percentage={tonePairProgress} color="bg-indigo-500" icon="📊" />
+          <ProgressCard title="Thanh mẫu" percentage={initialProgress} color="bg-rose-500" icon="🔤" catKey="initials" />
+          <ProgressCard title="Vận mẫu" percentage={finalProgress} color="bg-blue-500" icon="🅰️" catKey="finals" />
+          <ProgressCard title="Thanh điệu" percentage={toneProgress} color="bg-amber-500" icon="🎵" catKey="tones" />
+          <ProgressCard title="Ghép vần (Syllables)" percentage={syllableProgress} color="bg-purple-500" icon="🧩" catKey="syllables" />
+          <ProgressCard title="Quy tắc chính tả" percentage={spellingProgress} color="bg-teal-500" icon="📝" catKey="spellingRules" />
+          <ProgressCard title="Quy tắc biến điệu" percentage={sandhiProgress} color="bg-orange-500" icon="⚡" catKey="sandhiRules" />
+          <ProgressCard title="Ma trận âm điệu" percentage={tonePairProgress} color="bg-indigo-500" icon="📊" catKey="tonePairs" />
         </div>
 
         {/* Garden Stats */}
@@ -127,30 +178,113 @@ export default function ProgressDashboard() {
         </div>
       </div>
 
-      {selectedLevel !== null && (
-        <DetailsModal 
-          level={selectedLevel} 
-          progress={progress} 
-          onClose={() => setSelectedLevel(null)} 
-        />
-      )}
-    </div>
-  );
-}
+      {/* MODAL CHI TIẾT THEO LEVEL (Vòng tròn) */}
+      {selectedLevel !== null && (() => {
+        const items = getItemsForLevel(selectedLevel);
+        
+        const itemsByCategory = items.reduce((acc, curr) => {
+          if (!acc[curr.category]) acc[curr.category] = [];
+          acc[curr.category].push(curr.item);
+          return acc;
+        }, {});
+        
+        return (
+          <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200" onClick={() => setSelectedLevel(null)}>
+            <div className="bg-white rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <TreeIcon level={selectedLevel} />
+                  <div>
+                    <h3 className="text-xl font-black text-slate-800">
+                      Cây cấp độ {selectedLevel}
+                    </h3>
+                    <p className="text-sm font-medium text-slate-500">{items.length} mục đã đạt cấp độ này</p>
+                  </div>
+                </div>
+                <button onClick={() => setSelectedLevel(null)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto flex-1">
+                {Object.keys(itemsByCategory).length === 0 ? (
+                  <div className="text-center text-slate-400 font-medium py-8">
+                    Chưa có mục nào đạt cấp độ này.
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {Object.keys(itemsByCategory).map(cat => (
+                      <div key={cat}>
+                        <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider mb-3">
+                          {cat === 'initials' ? 'Thanh mẫu' : 
+                           cat === 'finals' ? 'Vận mẫu' : 
+                           cat === 'tones' ? 'Thanh điệu' : 
+                           cat === 'tonePairs' ? 'Ma trận âm điệu' : 
+                           cat === 'spellingRules' ? 'Quy tắc chính tả' : 
+                           cat === 'sandhiRules' ? 'Quy tắc biến điệu' : 'Ghép vần (Syllables)'} ({itemsByCategory[cat].length})
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {itemsByCategory[cat].map(item => (
+                            <span key={item} className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-bold rounded-lg border border-blue-100">
+                              {item === 'general' ? 'Quy tắc tổng quát' : item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
-function ProgressCard({ title, percentage, color, icon }) {
-  return (
-    <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center">
-      <div className="flex justify-between items-center mb-3">
-        <div className="font-bold text-slate-700 flex items-center gap-2">
-          <span>{icon}</span>
-          {title}
-        </div>
-        <div className="font-black text-slate-800">{percentage}%</div>
-      </div>
-      <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-        <div className={`${color} h-3 rounded-full transition-all duration-1000 ease-out`} style={{ width: `${percentage}%` }}></div>
-      </div>
+      {/* MODAL CHI TIẾT THEO THỂ LOẠI (Click vào Card) */}
+      {selectedCategory !== null && (() => {
+        const items = getItemsForCategory(selectedCategory.key);
+        
+        return (
+          <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200" onClick={() => setSelectedCategory(null)}>
+            <div className="bg-white rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-black text-slate-800">
+                    Chi tiết: {selectedCategory.title}
+                  </h3>
+                  <p className="text-sm font-medium text-slate-500">
+                    Đã học {items.length} mục
+                  </p>
+                </div>
+                <button onClick={() => setSelectedCategory(null)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto flex-1">
+                {items.length === 0 ? (
+                  <div className="text-center text-slate-400 font-medium py-8">
+                    Chưa học mục nào trong phần này.
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-3">
+                    {items.map(i => (
+                      <div key={i.item} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <span className="font-bold text-slate-700">
+                          {i.item === 'general' ? 'Tổng quát' : i.item}
+                        </span>
+                        <div className="scale-75 origin-left">
+                          <TreeIcon level={i.level} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -165,91 +299,6 @@ function StatBox({ level, count, onClick }) {
       <div className="text-2xl font-black text-slate-700">{count}</div>
       <div className="text-xs text-slate-400 font-bold uppercase mt-1">Cây</div>
       <div className="text-[10px] text-blue-400 mt-2 hover:underline">Xem chi tiết</div>
-    </div>
-  );
-}
-
-function DetailsModal({ level, progress, onClose }) {
-  const getLevelName = (lvl) => {
-    switch(lvl) {
-      case 0: return "Hạt giống (Chưa học)";
-      case 1: return "Mầm non (Level 1)";
-      case 2: return "Cây nhỏ (Level 2)";
-      case 3: return "Cây nở hoa (Level 3)";
-      case 4: return "Cây có quả (Level 4 - Đã thi)";
-      default: return "";
-    }
-  };
-
-  const getCategoryName = (cat) => {
-    switch(cat) {
-      case 'initials': return "Thanh mẫu";
-      case 'finals': return "Vận mẫu";
-      case 'tones': return "Thanh điệu";
-      case 'syllables': return "Ghép vần (Syllables)";
-      case 'tonePairs': return "Cặp thanh điệu (Biến điệu)";
-      case 'spellingRules': return "Quy tắc chính tả";
-      case 'sandhiRules': return "Quy tắc biến điệu";
-      default: return cat;
-    }
-  };
-
-  const itemsByCategory = {};
-  if (progress) {
-    Object.keys(progress).forEach(cat => {
-      const items = [];
-      Object.entries(progress[cat]).forEach(([key, val]) => {
-        if (val === level) items.push(key);
-      });
-      if (items.length > 0) {
-        itemsByCategory[cat] = items;
-      }
-    });
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-5 border-b border-slate-100 shrink-0">
-          <div className="flex items-center gap-3">
-            <TreeIcon level={level} className="scale-125" />
-            <h3 className="text-xl font-black text-slate-800">
-              {getLevelName(level)}
-            </h3>
-          </div>
-          <button 
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors"
-          >
-            <X size={18} strokeWidth={2.5} />
-          </button>
-        </div>
-
-        <div className="p-5 overflow-y-auto hide-scrollbar flex-1 bg-slate-50/50">
-          {Object.keys(itemsByCategory).length === 0 ? (
-            <div className="text-center text-slate-400 font-medium py-8">
-              Chưa có mục nào ở cấp độ này.
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {Object.keys(itemsByCategory).map(cat => (
-                <div key={cat} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-                  <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 border-b border-slate-100 pb-2">
-                    {getCategoryName(cat)} ({itemsByCategory[cat].length})
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {itemsByCategory[cat].map(item => (
-                      <span key={item} className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-bold rounded-lg border border-blue-100">
-                        {item === 'general' ? 'Quy tắc tổng quát' : item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }
