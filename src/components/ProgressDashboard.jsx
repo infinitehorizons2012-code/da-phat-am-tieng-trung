@@ -205,22 +205,18 @@ export default function ProgressDashboard() {
               </div>
               
               <div className="p-6 overflow-y-auto flex-1">
-                {Object.keys(itemsByCategory).length === 0 ? (
-                  <div className="text-center text-slate-400 font-medium py-8">
-                    Chưa có mục nào đạt cấp độ này.
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {Object.keys(itemsByCategory).map(cat => (
-                      <div key={cat}>
-                        <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider mb-3">
-                          {cat === 'initials' ? 'Thanh mẫu' : 
-                           cat === 'finals' ? 'Vận mẫu' : 
-                           cat === 'tones' ? 'Thanh điệu' : 
-                           cat === 'tonePairs' ? 'Ma trận âm điệu' : 
-                           cat === 'spellingRules' ? 'Quy tắc chính tả' : 
-                           cat === 'sandhiRules' ? 'Quy tắc biến điệu' : 'Ghép vần (Syllables)'} ({itemsByCategory[cat].length})
-                        </h4>
+                <div className="space-y-6">
+                  {['initials', 'finals', 'tones', 'syllables', 'tonePairs', 'spellingRules', 'sandhiRules'].map(cat => (
+                    <div key={cat}>
+                      <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider mb-3">
+                        {cat === 'initials' ? 'Thanh mẫu' : 
+                         cat === 'finals' ? 'Vận mẫu' : 
+                         cat === 'tones' ? 'Thanh điệu' : 
+                         cat === 'tonePairs' ? 'Ma trận âm điệu' : 
+                         cat === 'spellingRules' ? 'Quy tắc chính tả' : 
+                         cat === 'sandhiRules' ? 'Quy tắc biến điệu' : 'Ghép vần (Syllables)'} ({(itemsByCategory[cat] || []).length})
+                      </h4>
+                      {(itemsByCategory[cat] || []).length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {itemsByCategory[cat].map(item => (
                             <span key={item} className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-bold rounded-lg border border-blue-100">
@@ -228,10 +224,12 @@ export default function ProgressDashboard() {
                             </span>
                           ))}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ) : (
+                        <div className="text-sm text-slate-300 italic">Chưa có mục nào đạt cấp độ này.</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

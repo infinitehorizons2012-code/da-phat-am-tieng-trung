@@ -72,44 +72,39 @@ export const ProgressProvider = ({ children }) => {
   // itemId: 'b', 'a', 'ma3', '1-1', ...
   // isCorrect: boolean
   const updateScore = async (category, itemId, isCorrect) => {
-    if (!currentUser || !progress) return;
+    if (!currentUser) return;
 
-    const currentLevel = progress[category]?.[itemId] || 0;
-    
-    // Nếu đã đạt level 4 (có quả) thì không trừ điểm nữa
-    if (currentLevel >= 4) return;
-
-    let newLevel = currentLevel;
-    if (isCorrect) {
-      // Tăng điểm (tối đa level 3, level 4 chỉ đạt được qua kỳ thi)
-      newLevel = Math.min(3, currentLevel + 1);
-    } else {
-      // Giảm điểm (tối thiểu level 0)
-      newLevel = Math.max(0, currentLevel - 1);
-    }
-
-    if (newLevel !== currentLevel) {
-      const updatedCategory = {
-        ...progress[category],
-        [itemId]: newLevel
-      };
+    setProgress(prevProgress => {
+      const currentProg = prevProgress || getEmptyProgress();
+      const currentLevel = currentProg[category]?.[itemId] || 0;
       
-      const newProgress = {
-        ...progress,
-        [category]: updatedCategory
-      };
+      if (currentLevel >= 4) return prevProgress;
 
-      // Cập nhật State nội bộ ngay lập tức cho mượt
-      setProgress(newProgress);
+      let newLevel = currentLevel;
+      if (isCorrect) {
+        newLevel = Math.min(3, currentLevel + 1);
+      } else {
+        newLevel = Math.max(0, currentLevel - 1);
+      }
+
+      if (newLevel === currentLevel) return prevProgress;
+
+      const newProgress = {
+        ...currentProg,
+        [category]: {
+          ...currentProg[category],
+          [itemId]: newLevel
+        }
+      };
 
       // Lưu lên Firestore
-      try {
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        await setDoc(userDocRef, { progress: newProgress }, { merge: true });
-      } catch (error) {
-        console.error("Lỗi cập nhật tiến độ lên server:", error);
-      }
-    }
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      setDoc(userDocRef, { progress: newProgress }, { merge: true }).catch(err => {
+        console.error("Lỗi cập nhật tiến độ lên server:", err);
+      });
+
+      return newProgress;
+    });
   };
 
   // Hàm nâng lên level 4 (dành riêng cho lúc thi cuối kỳ)
