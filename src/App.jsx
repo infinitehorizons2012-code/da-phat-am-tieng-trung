@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PinyinTable from './components/PinyinTable';
 import TonePairPractice from './components/TonePairPractice';
 import QuizMode from './components/QuizMode';
