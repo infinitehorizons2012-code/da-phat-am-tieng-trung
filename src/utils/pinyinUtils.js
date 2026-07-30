@@ -32,58 +32,29 @@ export const applyTone = (syllable, tone) => {
   return syllable;
 };
 
-// Global audio object để có thể dừng khi đang phát dở
-let currentAudio = null;
-
-const toneMarksReverse = {
-  'ā': { char: 'a', tone: 1 }, 'á': { char: 'a', tone: 2 }, 'ǎ': { char: 'a', tone: 3 }, 'à': { char: 'a', tone: 4 },
-  'ē': { char: 'e', tone: 1 }, 'é': { char: 'e', tone: 2 }, 'ě': { char: 'e', tone: 3 }, 'è': { char: 'e', tone: 4 },
-  'ī': { char: 'i', tone: 1 }, 'í': { char: 'i', tone: 2 }, 'ǐ': { char: 'i', tone: 3 }, 'ì': { char: 'i', tone: 4 },
-  'ō': { char: 'o', tone: 1 }, 'ó': { char: 'o', tone: 2 }, 'ǒ': { char: 'o', tone: 3 }, 'ò': { char: 'o', tone: 4 },
-  'ū': { char: 'u', tone: 1 }, 'ú': { char: 'u', tone: 2 }, 'ǔ': { char: 'u', tone: 3 }, 'ù': { char: 'u', tone: 4 },
-  'ǖ': { char: 'v', tone: 1 }, 'ǘ': { char: 'v', tone: 2 }, 'ǚ': { char: 'v', tone: 3 }, 'ǜ': { char: 'v', tone: 4 },
-  'ü': { char: 'v', tone: 1 } // neutral/default cho ü
-};
-
-export const pinyinToNumber = (pinyin) => {
-  let tone = 5; // Mặc định là thanh 5 (khinh thanh) nếu không có dấu
-  let basePinyin = '';
-  for (let i = 0; i < pinyin.length; i++) {
-    const char = pinyin[i];
-    if (toneMarksReverse[char]) {
-      basePinyin += toneMarksReverse[char].char;
-      tone = toneMarksReverse[char].tone;
-    } else {
-      basePinyin += char;
-    }
-  }
-  return basePinyin + tone;
-};
+// Global audio object để có thể dừng khi đang phát dở và tránh bị chặn Autoplay trên Safari
+let globalAudio = null;
 
 export const playPinyinAudio = (text, onEnd, onStatus) => {
   stopAudio();
   
+  if (!globalAudio) {
+    globalAudio = new Audio();
+  }
+
   let fileName = pinyinToNumber(text);
   
   let isNeutral = false;
   if (fileName.endsWith('5')) {
     isNeutral = true;
-    // Fallback to tone 1 audio file for neutral tone
     fileName = fileName.slice(0, -1) + '1'; 
   }
 
-  // Handle specific filename mismatches with Cloudinary
-  if (fileName.startsWith('nve')) {
-    fileName = fileName.replace('nve', 'n%C3%BCe');
-  } else if (fileName.startsWith('lve')) {
-    fileName = fileName.replace('lve', 'l%C3%BCe');
-  } else if (fileName.startsWith('nv')) {
-    fileName = fileName.replace('nv', 'nu');
-  } else if (fileName.startsWith('lv')) {
-    fileName = fileName.replace('lv', 'lu');
-  }
+  if (fileName.startsWith('nve')) fileName = fileName.replace('nve', 'n%C3%BCe');
+  else if (fileName.startsWith('lve')) fileName = fileName.replace('lve', 'l%C3%BCe');
+  else if (fileName.startsWith('nv')) fileName = fileName.replace('nv', 'nu');
+  else if (fileName.startsWith('lv')) fileName = fileName.replace('lv', 'lu');
   
-  // Sử dụng nguồn Cloudinary cá nhân để đảm bảo đầy đủ âm tiết và ổn định
   const cdnList = [
     { name: 'Cloudinary', url: `https://res.cloudinary.com/zopjocdi/video/upload/da-phat-am-tieng-trung/audio/${fileName}.mp3` }
   ];
@@ -100,27 +71,24 @@ export const playPinyinAudio = (text, onEnd, onStatus) => {
     
     if (onStatus) onStatus(cdnList[currentTry].name);
     const url = cdnList[currentTry].url;
-    const audio = new Audio(url);
     
-    if (isNeutral) {
-      audio.playbackRate = 1.3; // Ngắn và nhanh hơn
-      audio.volume = 0.6; // Nhẹ hơn
-    }
+    // Tái sử dụng globalAudio
+    globalAudio.src = url;
+    globalAudio.playbackRate = isNeutral ? 1.3 : 1.0;
+    globalAudio.volume = isNeutral ? 0.6 : 1.0;
     
-    // Gán ngay để hàm stopAudio() có thể dừng nếu user bấm nhanh ô khác
-    currentAudio = audio;
-    
-    audio.addEventListener('ended', () => {
+    // Dọn dẹp event cũ
+    globalAudio.onended = () => {
+      globalAudio.onended = null;
       if (onEnd) onEnd();
-    });
+    };
     
-    audio.addEventListener('error', () => {
+    globalAudio.onerror = () => {
       currentTry++;
-      tryNext(); // Nếu file lỗi (404) hoặc mạng chặn, thử link tiếp theo
-    });
+      tryNext();
+    };
     
-    audio.play().catch(error => {
-      // Nếu bị chặn autoplay hoặc đứt mạng
+    globalAudio.play().catch(error => {
       currentTry++;
       tryNext();
     });
@@ -141,11 +109,8 @@ export const playAudioSequence = (syllablesData, onProgress, onComplete) => {
     }
     
     const data = syllablesData[currentIndex];
-    // data có dạng { cellId, text: 'ma' }
-    
     if (onProgress) onProgress(currentIndex, data);
     
-    // Mặc định Auto Play đọc thanh 1
     playPinyinAudio(data.text, () => {
       currentIndex++;
       setTimeout(playNext, 400); 
@@ -156,10 +121,11 @@ export const playAudioSequence = (syllablesData, onProgress, onComplete) => {
 };
 
 export const stopAudio = () => {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    currentAudio = null;
+  if (globalAudio) {
+    globalAudio.pause();
+    globalAudio.onended = null;
+    globalAudio.onerror = null;
+    // Không xoá src hoặc currentTime để tránh lỗi DOMException trên một số trình duyệt
   }
 };
 
@@ -237,18 +203,20 @@ export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus)
     }, onStatus);
     
     // Hack: Tăng tốc độ phát của audio hiện tại để nghe mượt và liền mạch hơn
-    if (currentAudio) {
-      currentAudio.playbackRate = 1.25; 
+    if (globalAudio) {
+      globalAudio.playbackRate = 1.25; 
       
       // Hoặc nếu muốn cắt sớm (crossfade/overlap):
       // Nếu không phải âm cuối, ta ngắt sớm một chút (trước khi kết thúc) để nối âm tiếp theo
       if (currentIndex < tokens.length - 1) {
-        currentAudio.addEventListener('timeupdate', function onTimeUpdate() {
+        globalAudio.addEventListener('timeupdate', function onTimeUpdate() {
           const duration = this.duration || 0.8;
           // Ngắt sớm 0.2s trước khi kết thúc để nối âm mượt mà
           const cutTime = Math.max(0.1, duration - 0.2);
           if (this.currentTime >= cutTime) {
             this.removeEventListener('timeupdate', onTimeUpdate);
+            // Huỷ onended để tránh gọi 2 lần playNext
+            this.onended = null;
             currentIndex++;
             playNext();
           }
