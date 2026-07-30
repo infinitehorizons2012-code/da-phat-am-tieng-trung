@@ -44,28 +44,6 @@ export default function PinyinTable() {
     );
   };
 
-  const playInitialColumn = (initId) => {
-    const sequence = [];
-    finals.forEach(final => {
-      const syllable = pinyinMatrix[initId]?.[final];
-      if (syllable && isCellMatched(syllable)) {
-        sequence.push({ cellId: `${initId}-${final}`, text: syllable });
-      }
-    });
-    playSequence(sequence);
-  };
-
-  const playFinalRow = (final) => {
-    const sequence = [];
-    displayedInitials.forEach(init => {
-      const syllable = pinyinMatrix[init.id]?.[final];
-      if (syllable && isCellMatched(syllable)) {
-        sequence.push({ cellId: `${init.id}-${final}`, text: syllable });
-      }
-    });
-    playSequence(sequence);
-  };
-
   const displayedInitials = filterInitial === 'all' 
     ? initials 
     : initials.filter(i => i.id === filterInitial);
@@ -95,9 +73,7 @@ export default function PinyinTable() {
               {displayedInitials.map(init => (
                 <th 
                   key={init.id}
-                  className="sticky top-0 z-20 bg-slate-50 border-b-2 border-slate-200 border-l border-slate-100 p-2 text-rose-600 font-black cursor-pointer hover:bg-rose-50 shadow-sm"
-                  onClick={() => playInitialColumn(init.id)}
-                  title="Click để Auto Play cột này"
+                  className="sticky top-0 z-20 bg-slate-50 border-b-2 border-slate-200 border-l border-slate-100 p-2 text-rose-600 font-black shadow-sm"
                 >
                   {init.label}
                 </th>
@@ -108,9 +84,7 @@ export default function PinyinTable() {
             {finals.map(final => (
               <tr key={final} className="hover:bg-slate-50/50">
                 <td 
-                  className="sticky left-0 z-10 bg-slate-50 border-r-2 border-slate-200 border-t border-slate-100 p-2 text-emerald-600 font-black cursor-pointer hover:bg-emerald-50 shadow-sm"
-                  onClick={() => playFinalRow(final)}
-                  title="Click để Auto Play hàng này"
+                  className="sticky left-0 z-10 bg-slate-50 border-r-2 border-slate-200 border-t border-slate-100 p-2 text-emerald-600 font-black shadow-sm"
                 >
                   {final}
                 </td>

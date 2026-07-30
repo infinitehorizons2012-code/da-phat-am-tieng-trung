@@ -101,10 +101,6 @@ function App() {
                     Bấm ô để nghe & chọn thanh điệu
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Play className="w-3.5 h-3.5 text-emerald-500" />
-                    Bấm tiêu đề hàng/cột để Auto Play
-                  </span>
-                  <span className="flex items-center gap-1.5">
                     <span className="inline-flex h-2.5 w-16 rounded-full overflow-hidden ring-1 ring-slate-200" style={{ background: 'linear-gradient(90deg, rgba(16,185,129,0.10), rgba(16,185,129,0.55))' }}></span>
                     Đã nghe (nhạt → đậm)
                   </span>
