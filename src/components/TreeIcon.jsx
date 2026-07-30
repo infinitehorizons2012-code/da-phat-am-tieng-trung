@@ -15,7 +15,7 @@ export default function TreeIcon({ level, className = "" }) {
       case 1:
         return { Icon: Leaf, color: "text-emerald-400", title: "Mầm non (Level 1)" };
       case 2:
-        return { Icon: Sprout, color: "text-emerald-500", title: "Cây nhỏ (Level 2)" };
+        return { Icon: null, color: "", title: "Cây nhỏ (Level 2)", isTree: true };
       case 3:
         return { Icon: Flower2, color: "text-pink-500", title: "Cây nở hoa (Level 3)", isFlower: true };
       case 4:
@@ -26,17 +26,33 @@ export default function TreeIcon({ level, className = "" }) {
     }
   };
 
-  const { Icon, color, title, isFlower } = getIconAndColor();
+  const { Icon, color, title, isFlower, isTree } = getIconAndColor();
 
   if (Icon === 'none') {
     return null;
   }
 
+  if (isTree) {
+    // Custom SVG cho cây nhỏ: Thân nâu, tán lá xanh
+    return (
+      <div title={title} className={`flex items-center justify-center ${className}`}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Thân cây (Nâu) */}
+          <path d="M12 22V11" stroke="#8B4513" strokeWidth="3.5" strokeLinecap="round"/>
+          {/* Tán cây (Xanh) */}
+          <circle cx="12" cy="7" r="5" fill="#10b981"/>
+          <circle cx="8" cy="11" r="4.5" fill="#10b981"/>
+          <circle cx="16" cy="11" r="4.5" fill="#10b981"/>
+        </svg>
+      </div>
+    );
+  }
+
   if (!Icon) {
-    // Level 0: Seed
+    // Level 0: Seed (Vàng cam)
     return (
       <div 
-        className={`w-3 h-3 rounded-[40%_60%_60%_40%/50%_50%_50%_50%] bg-[#8B5A2B] border border-[#6B4226] shadow-sm rotate-45 ${className}`} 
+        className={`w-3 h-3 rounded-[40%_60%_60%_40%/50%_50%_50%_50%] bg-amber-500 border border-amber-600 shadow-sm rotate-45 ${className}`} 
         title={title}
       />
     );
