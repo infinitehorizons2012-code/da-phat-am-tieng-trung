@@ -26,17 +26,30 @@ export default function ProgressDashboard() {
 
   // Calculate current progress based on max level 3 (Level 4 is bonus/exam)
   const calculateCategoryProgress = (category, totalItemsCount) => {
-    if (!progress || !progress[category]) return 0;
     let currentScore = 0;
-    Object.keys(progress[category]).forEach(key => {
-      currentScore += Math.min(3, progress[category][key]);
-    });
+    let learnedItems = 0;
+    if (progress && progress[category]) {
+      Object.keys(progress[category]).forEach(key => {
+        const val = progress[category][key];
+        currentScore += Math.min(3, val);
+        if (val > 0) learnedItems++;
+      });
+    }
     const maxScore = totalItemsCount * 3;
-    if (maxScore === 0) return 0;
+    let pct = 0;
+    if (maxScore > 0) {
+      pct = (currentScore / maxScore) * 100;
+      if (pct > 0 && pct < 1) pct = Number(pct.toFixed(2));
+      else pct = Math.round(pct);
+    }
     
-    const pct = (currentScore / maxScore) * 100;
-    if (pct > 0 && pct < 1) return pct.toFixed(2);
-    return Math.round(pct);
+    return {
+      percentage: pct,
+      learned: learnedItems,
+      total: totalItemsCount,
+      score: currentScore,
+      maxScore: maxScore
+    };
   };
 
   const calculateOverallProgress = () => {
@@ -59,13 +72,13 @@ export default function ProgressDashboard() {
     return Math.round(pct);
   };
 
-  const initialProgress = calculateCategoryProgress('initials', totalInitials);
-  const finalProgress = calculateCategoryProgress('finals', totalFinals);
-  const toneProgress = calculateCategoryProgress('tones', totalTones);
-  const syllableProgress = calculateCategoryProgress('syllables', totalSyllables);
-  const tonePairProgress = calculateCategoryProgress('tonePairs', totalTonePairs);
-  const spellingProgress = calculateCategoryProgress('spellingRules', totalSpellingRules);
-  const sandhiProgress = calculateCategoryProgress('sandhiRules', totalSandhiRules);
+  const initStats = calculateCategoryProgress('initials', totalInitials);
+  const finStats = calculateCategoryProgress('finals', totalFinals);
+  const toneStats = calculateCategoryProgress('tones', totalTones);
+  const sylStats = calculateCategoryProgress('syllables', totalSyllables);
+  const pairStats = calculateCategoryProgress('tonePairs', totalTonePairs);
+  const spellStats = calculateCategoryProgress('spellingRules', totalSpellingRules);
+  const sandhiStats = calculateCategoryProgress('sandhiRules', totalSandhiRules);
   const overallProgress = calculateOverallProgress();
 
   // --- LOGIC CHO MODAL VÒNG TRÒN DƯỚI CÙNG (NHÓM THEO LEVEL) ---
@@ -99,22 +112,28 @@ export default function ProgressDashboard() {
     return items.sort((a, b) => b.level - a.level);
   };
 
-  const ProgressCard = ({ title, percentage, color, icon, catKey }) => (
+  const ProgressCard = ({ title, stats, color, icon, catKey }) => (
     <div 
       onClick={() => setSelectedCategory({ title, key: catKey })}
-      className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer active:scale-95"
+      className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer active:scale-95"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-lg">
             {icon}
           </div>
           <span className="font-bold text-slate-700">{title}</span>
         </div>
-        <div className="text-lg font-black text-slate-800">{percentage}%</div>
+        <div className="text-lg font-black text-slate-800">{stats.percentage}%</div>
       </div>
-      <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${percentage}%` }}></div>
+      
+      <div className="flex justify-between text-[11px] font-medium text-slate-500 mb-2">
+        <span>Đã học: <span className="font-bold text-slate-700">{stats.learned}/{stats.total}</span></span>
+        <span>Điểm: <span className="font-bold text-slate-700">{stats.score}/{stats.maxScore}</span></span>
+      </div>
+
+      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${stats.percentage}%` }}></div>
       </div>
     </div>
   );
@@ -176,13 +195,13 @@ export default function ProgressDashboard() {
         {activeTab === 'categories' ? (
           /* Progress Bars */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <ProgressCard title="Thanh mẫu" percentage={initialProgress} color="bg-rose-500" icon="🔤" catKey="initials" />
-            <ProgressCard title="Vận mẫu" percentage={finalProgress} color="bg-blue-500" icon="🅰️" catKey="finals" />
-            <ProgressCard title="Thanh điệu" percentage={toneProgress} color="bg-amber-500" icon="🎵" catKey="tones" />
-            <ProgressCard title="Ghép vần (Syllables)" percentage={syllableProgress} color="bg-purple-500" icon="🧩" catKey="syllables" />
-            <ProgressCard title="Quy tắc chính tả" percentage={spellingProgress} color="bg-teal-500" icon="📝" catKey="spellingRules" />
-            <ProgressCard title="Quy tắc biến điệu" percentage={sandhiProgress} color="bg-orange-500" icon="⚡" catKey="sandhiRules" />
-            <ProgressCard title="Ma trận âm điệu" percentage={tonePairProgress} color="bg-indigo-500" icon="📊" catKey="tonePairs" />
+            <ProgressCard title="Thanh mẫu" stats={initStats} color="bg-rose-500" icon="🔤" catKey="initials" />
+            <ProgressCard title="Vận mẫu" stats={finStats} color="bg-blue-500" icon="🅰️" catKey="finals" />
+            <ProgressCard title="Thanh điệu" stats={toneStats} color="bg-amber-500" icon="🎵" catKey="tones" />
+            <ProgressCard title="Ghép vần (Syllables)" stats={sylStats} color="bg-purple-500" icon="🧩" catKey="syllables" />
+            <ProgressCard title="Quy tắc chính tả" stats={spellStats} color="bg-teal-500" icon="📝" catKey="spellingRules" />
+            <ProgressCard title="Quy tắc biến điệu" stats={sandhiStats} color="bg-orange-500" icon="⚡" catKey="sandhiRules" />
+            <ProgressCard title="Ma trận âm điệu" stats={pairStats} color="bg-indigo-500" icon="📊" catKey="tonePairs" />
           </div>
         ) : (
           /* Garden Stats */

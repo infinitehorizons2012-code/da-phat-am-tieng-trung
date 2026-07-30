@@ -186,43 +186,167 @@ export const generateToneQuizRound = (numQuestions = 10) => {
 
 // Dữ liệu các từ ghép (đặc biệt chú trọng biến điệu)
 const tonePairWords = [
-  // 3+3 -> 2+3
+  // 1-1
+  { word: ['ka', 'fei'], tones: [1, 1], sandhiTones: [1, 1] },
+  { word: ['fei', 'ji'], tones: [1, 1], sandhiTones: [1, 1] },
+  { word: ['xing', 'qi'], tones: [1, 1], sandhiTones: [1, 1] },
+  { word: ['jin', 'tian'], tones: [1, 1], sandhiTones: [1, 1] },
+  { word: ['chu', 'zu'], tones: [1, 1], sandhiTones: [1, 1] },
+
+  // 1-2
+  { word: ['zhong', 'guo'], tones: [1, 2], sandhiTones: [1, 2] },
+  { word: ['xin', 'nian'], tones: [1, 2], sandhiTones: [1, 2] },
+  { word: ['gong', 'zuo'], tones: [1, 2], sandhiTones: [1, 2] },
+  { word: ['gong', 'yuan'], tones: [1, 2], sandhiTones: [1, 2] },
+  { word: ['jing', 'cha'], tones: [1, 2], sandhiTones: [1, 2] },
+
+  // 1-3
+  { word: ['pao', 'bu'], tones: [1, 3], sandhiTones: [1, 3] },
+  { word: ['jing', 'li'], tones: [1, 3], sandhiTones: [1, 3] },
+  { word: ['chu', 'kou'], tones: [1, 3], sandhiTones: [1, 3] },
+  { word: ['ying', 'yu'], tones: [1, 3], sandhiTones: [1, 3] },
+  
+  // 1-4
+  { word: ['sheng', 'ri'], tones: [1, 4], sandhiTones: [1, 4] },
+  { word: ['zhi', 'shi'], tones: [1, 4], sandhiTones: [1, 4] },
+  { word: ['che', 'zhan'], tones: [1, 4], sandhiTones: [1, 4] },
+  { word: ['yin', 'yue'], tones: [1, 4], sandhiTones: [1, 4] },
+  
+  // 1-5
+  { word: ['yi', 'fu'], tones: [1, 5], sandhiTones: [1, 5] },
+  { word: ['zhuo', 'zi'], tones: [1, 5], sandhiTones: [1, 5] },
+  { word: ['ge', 'ge'], tones: [1, 5], sandhiTones: [1, 5] },
+  { word: ['ta', 'men'], tones: [1, 5], sandhiTones: [1, 5] },
+
+  // 2-1
+  { word: ['ming', 'tian'], tones: [2, 1], sandhiTones: [2, 1] },
+  { word: ['zuo', 'tian'], tones: [2, 1], sandhiTones: [2, 1] },
+  { word: ['tong', 'zhi'], tones: [2, 1], sandhiTones: [2, 1] },
+  { word: ['guo', 'jia'], tones: [2, 1], sandhiTones: [2, 1] },
+
+  // 2-2
+  { word: ['yin', 'hang'], tones: [2, 2], sandhiTones: [2, 2] },
+  { word: ['tong', 'xue'], tones: [2, 2], sandhiTones: [2, 2] },
+  { word: ['shi', 'tang'], tones: [2, 2], sandhiTones: [2, 2] },
+  { word: ['lan', 'qiu'], tones: [2, 2], sandhiTones: [2, 2] },
+
+  // 2-3
+  { word: ['niu', 'nai'], tones: [2, 3], sandhiTones: [2, 3] },
+  { word: ['ci', 'dian'], tones: [2, 3], sandhiTones: [2, 3] },
+  { word: ['nan', 'hai'], tones: [2, 3], sandhiTones: [2, 3] },
+  { word: ['ping', 'guo'], tones: [2, 3], sandhiTones: [2, 3] },
+
+  // 2-4
+  { word: ['xue', 'xiao'], tones: [2, 4], sandhiTones: [2, 4] },
+  { word: ['huang', 'se'], tones: [2, 4], sandhiTones: [2, 4] },
+  { word: ['wang', 'luo'], tones: [2, 4], sandhiTones: [2, 4] },
+  { word: ['nan', 'guo'], tones: [2, 4], sandhiTones: [2, 4] },
+  
+  // 2-5
+  { word: ['ming', 'zi'], tones: [2, 5], sandhiTones: [2, 5] },
+  { word: ['hai', 'zi'], tones: [2, 5], sandhiTones: [2, 5] },
+  { word: ['xue', 'sheng'], tones: [2, 5], sandhiTones: [2, 5] },
+  { word: ['peng', 'you'], tones: [2, 5], sandhiTones: [2, 5] },
+
+  // 3-1
+  { word: ['lao', 'shi'], tones: [3, 1], sandhiTones: [3, 1] },
+  { word: ['shou', 'ji'], tones: [3, 1], sandhiTones: [3, 1] },
+  { word: ['bei', 'jing'], tones: [3, 1], sandhiTones: [3, 1] },
+  { word: ['hen', 'duo'], tones: [3, 1], sandhiTones: [3, 1] },
+
+  // 3-2
+  { word: ['mei', 'guo'], tones: [3, 2], sandhiTones: [3, 2] },
+  { word: ['lv', 'you'], tones: [3, 2], sandhiTones: [3, 2] },
+  { word: ['yu', 'yan'], tones: [3, 2], sandhiTones: [3, 2] },
+  { word: ['ji', 'chu'], tones: [3, 2], sandhiTones: [3, 2] },
+
+  // 3-3 -> 2-3 (Rule)
   { word: ['ni', 'hao'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
   { word: ['ke', 'yi'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
   { word: ['lao', 'ban'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
   { word: ['shou', 'biao'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
   { word: ['yu', 'san'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
+  { word: ['shui', 'guo'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
+  { word: ['zhan', 'lan'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
+  { word: ['hen', 'hao'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
+
+  // 3-4
+  { word: ['dian', 'nao'], tones: [3, 4], sandhiTones: [3, 4] },
+  { word: ['hao', 'kan'], tones: [3, 4], sandhiTones: [3, 4] },
+  { word: ['nu', 'li'], tones: [3, 4], sandhiTones: [3, 4] },
+  { word: ['zhun', 'bei'], tones: [3, 4], sandhiTones: [3, 4] },
+
+  // 3-5
+  { word: ['jie', 'jie'], tones: [3, 5], sandhiTones: [3, 5] },
+  { word: ['nai', 'nai'], tones: [3, 5], sandhiTones: [3, 5] },
+  { word: ['li', 'mian'], tones: [3, 5], sandhiTones: [3, 5] },
+  { word: ['yan', 'jing'], tones: [3, 5], sandhiTones: [3, 5] },
   
-  // Biến điệu của "yi"
+  // 4-1
+  { word: ['dian', 'che'], tones: [4, 1], sandhiTones: [4, 1] },
+  { word: ['qi', 'che'], tones: [4, 1], sandhiTones: [4, 1] },
+  { word: ['dian', 'xin'], tones: [4, 1], sandhiTones: [4, 1] },
+  { word: ['kan', 'shu'], tones: [4, 1], sandhiTones: [4, 1] },
+
+  // 4-2
+  { word: ['dian', 'tai'], tones: [4, 2], sandhiTones: [4, 2] },
+  { word: ['wen', 'ti'], tones: [4, 2], sandhiTones: [4, 2] },
+  { word: ['shang', 'xue'], tones: [4, 2], sandhiTones: [4, 2] },
+  { word: ['dian', 'chi'], tones: [4, 2], sandhiTones: [4, 2] },
+
+  // 4-3
+  { word: ['han', 'yu'], tones: [4, 3], sandhiTones: [4, 3] },
+  { word: ['zi', 'ji'], tones: [4, 3], sandhiTones: [4, 3] },
+  { word: ['dian', 'ying'], tones: [4, 3], sandhiTones: [4, 3] },
+  
+  // 4-4
+  { word: ['dian', 'shi'], tones: [4, 4], sandhiTones: [4, 4] },
+  { word: ['xian', 'zai'], tones: [4, 4], sandhiTones: [4, 4] },
+  { word: ['zai', 'jian'], tones: [4, 4], sandhiTones: [4, 4] },
+  { word: ['kuai', 'le'], tones: [4, 4], sandhiTones: [4, 4] },
+  
+  // 4-5
+  { word: ['ba', 'ba'], tones: [4, 5], sandhiTones: [4, 5] },
+  { word: ['mei', 'mei'], tones: [4, 5], sandhiTones: [4, 5] },
+  { word: ['piao', 'liang'], tones: [4, 5], sandhiTones: [4, 5] },
+
+  // Biến điệu của "yi" (tone 1)
   { word: ['yi', 'ge'], tones: [1, 4], sandhiTones: [2, 4], ruleId: 'yi' },
   { word: ['yi', 'tian'], tones: [1, 1], sandhiTones: [4, 1], ruleId: 'yi' },
   { word: ['yi', 'nian'], tones: [1, 2], sandhiTones: [4, 2], ruleId: 'yi' },
   { word: ['yi', 'qi'], tones: [1, 3], sandhiTones: [4, 3], ruleId: 'yi' },
   { word: ['yi', 'kuai'], tones: [1, 4], sandhiTones: [2, 4], ruleId: 'yi' },
+  { word: ['yi', 'ding'], tones: [1, 4], sandhiTones: [2, 4], ruleId: 'yi' },
+  { word: ['yi', 'ci'], tones: [1, 4], sandhiTones: [2, 4], ruleId: 'yi' },
+  { word: ['yi', 'ban'], tones: [1, 1], sandhiTones: [4, 1], ruleId: 'yi' },
+  { word: ['yi', 'dian'], tones: [1, 3], sandhiTones: [4, 3], ruleId: 'yi' },
+  { word: ['yi', 'xie'], tones: [1, 1], sandhiTones: [4, 1], ruleId: 'yi' },
   
-  // Biến điệu của "bu"
+  // Biến điệu của "bu" (tone 4)
   { word: ['bu', 'shi'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' },
   { word: ['bu', 'dui'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' },
   { word: ['bu', 'hao'], tones: [4, 3], sandhiTones: [4, 3], ruleId: 'bu' },
   { word: ['bu', 'mang'], tones: [4, 2], sandhiTones: [4, 2], ruleId: 'bu' },
-  
-  // Các cặp không có biến điệu phổ biến
-  { word: ['zhong', 'guo'], tones: [1, 2], sandhiTones: [1, 2] },
-  { word: ['xue', 'xiao'], tones: [2, 4], sandhiTones: [2, 4] },
-  { word: ['ming', 'tian'], tones: [2, 1], sandhiTones: [2, 1] },
-  { word: ['dian', 'nao'], tones: [4, 3], sandhiTones: [4, 3] },
-  { word: ['han', 'yu'], tones: [4, 3], sandhiTones: [4, 3] },
-  { word: ['chi', 'fan'], tones: [1, 4], sandhiTones: [1, 4] },
-  { word: ['jie', 'jie'], tones: [3, 5], sandhiTones: [3, 5] },
-  { word: ['lao', 'shi'], tones: [3, 1], sandhiTones: [3, 1] }
+  { word: ['bu', 'cuo'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' },
+  { word: ['bu', 'yao'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' },
+  { word: ['bu', 'neng'], tones: [4, 2], sandhiTones: [4, 2], ruleId: 'bu' },
+  { word: ['bu', 'yong'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' },
+  { word: ['bu', 'hui'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' },
+  { word: ['bu', 'pa'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' },
+  { word: ['bu', 'tong'], tones: [4, 2], sandhiTones: [4, 2], ruleId: 'bu' },
+  { word: ['bu', 'qu'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' }
 ];
 
 // Hàm tạo 10 câu hỏi để nghe cặp thanh điệu
 export const generateTonePairQuizRound = (numQuestions = 10) => {
   const questions = [];
   
-  for (let i = 0; i < numQuestions; i++) {
-    const correctWord = tonePairWords[Math.floor(Math.random() * tonePairWords.length)];
+  // Shuffle tonePairWords and pick the first numQuestions elements to guarantee unique words
+  const shuffledWords = [...tonePairWords].sort(() => Math.random() - 0.5);
+  const selectedWords = shuffledWords.slice(0, numQuestions);
+  
+  for (let i = 0; i < selectedWords.length; i++) {
+    const correctWord = selectedWords[i];
     
     // Yêu cầu mới: Đáp án đúng phải là thanh ĐÃ BIẾN ĐIỆU (những gì người dùng nghe được)
     const originalTones = correctWord.tones;
