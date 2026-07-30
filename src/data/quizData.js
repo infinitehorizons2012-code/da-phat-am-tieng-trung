@@ -544,3 +544,116 @@ export const generateSpellingQuizRound = (numQuestions = 10, progress = null) =>
   
   return questions;
 };
+
+// Hàm sinh Đề thi Cuối Kỳ (Level 4 - Ra quả)
+export const generateFinalExamRound = (progress) => {
+  const targets = [];
+  const questions = [];
+  
+  const formatLabel = (t) => t === 5 ? '5th' : t === 1 ? '1st' : t === 2 ? '2nd' : t === 3 ? '3rd' : t === 4 ? '4th' : t;
+
+  // 1. Chọn 2 Spelling Rules
+  const rulesById = {};
+  spellingRulesData.forEach(r => {
+    if(!rulesById[r.ruleId]) rulesById[r.ruleId] = [];
+    rulesById[r.ruleId].push(r);
+  });
+  const allRuleIds = Object.keys(rulesById);
+  const selectedRuleIds = allRuleIds.sort(() => Math.random() - 0.5).slice(0, 2);
+  
+  selectedRuleIds.forEach(ruleId => {
+    targets.push({ category: 'spellingRules', itemId: ruleId });
+    const ruleQuestions = rulesById[ruleId].sort(() => Math.random() - 0.5);
+    for(let i=0; i<3; i++) {
+      const rule = ruleQuestions[i % ruleQuestions.length];
+      const options = [{ text: rule.correct, isCorrect: true }, ...rule.wrong.map(w => ({ text: w, isCorrect: false }))];
+      questions.push({
+        isSpellingMode: true,
+        ruleId: rule.ruleId,
+        formula: rule.formula,
+        correctAnswer: rule.correct,
+        options: options.sort(() => Math.random() - 0.5),
+        target: { category: 'spellingRules', itemId: ruleId }
+      });
+    }
+  });
+
+  // 2. Chọn 2 Tone Pairs
+  const selectedTonePairs = [...tonePairWords].sort(() => Math.random() - 0.5).slice(0, 2);
+  selectedTonePairs.forEach(pair => {
+    const itemId = `${pair.tones[0]}-${pair.tones[1]}`;
+    targets.push({ category: 'tonePairs', itemId });
+    for(let i=0; i<3; i++) {
+      const originalTones = pair.tones;
+      const pronouncedTones = pair.sandhiTones || pair.tones;
+      const options = [{ tones: pronouncedTones, label: `${formatLabel(pronouncedTones[0])} + ${formatLabel(pronouncedTones[1])}`, isCorrect: true }];
+      while(options.length < 4) {
+        const wrongTones = [Math.floor(Math.random()*4)+1, Math.floor(Math.random()*4)+1];
+        if(!options.some(opt => opt.tones[0]===wrongTones[0] && opt.tones[1]===wrongTones[1])) {
+          options.push({ tones: wrongTones, label: `${formatLabel(wrongTones[0])} + ${formatLabel(wrongTones[1])}`, isCorrect: false });
+        }
+      }
+      questions.push({
+        correctWord: pair.word,
+        originalTones,
+        correctTones: pronouncedTones,
+        ruleId: pair.ruleId,
+        options: options.sort(() => Math.random() - 0.5),
+        isTonePairMode: true,
+        target: { category: 'tonePairs', itemId }
+      });
+    }
+  });
+  
+  // 3. Chọn 2 Tones
+  const allTones = [1, 2, 3, 4];
+  const selectedTones = allTones.sort(() => Math.random() - 0.5).slice(0, 2);
+  selectedTones.forEach(tone => {
+    targets.push({ category: 'tones', itemId: tone.toString() });
+    for(let i=0; i<3; i++) {
+      const correctSyllable = uniqueSyllables[Math.floor(Math.random() * uniqueSyllables.length)];
+      const options = [{ base: correctSyllable, tone, isCorrect: true }];
+      while(options.length < 4) {
+        const wrongTone = Math.floor(Math.random()*4)+1;
+        if(wrongTone !== tone && !options.some(opt => opt.tone === wrongTone)) {
+          options.push({ base: correctSyllable, tone: wrongTone, isCorrect: false });
+        }
+      }
+      questions.push({
+        correctBase: correctSyllable,
+        correctTone: tone,
+        options: options.sort(() => Math.random() - 0.5),
+        target: { category: 'tones', itemId: tone.toString() }
+      });
+    }
+  });
+
+  // 4. Chọn 2 Random Syllables
+  const selectedSyllables = [...uniqueSyllables].sort(() => Math.random() - 0.5).slice(0, 2);
+  selectedSyllables.forEach(syl => {
+    const tone = Math.floor(Math.random() * 4) + 1;
+    const itemId = `${syl}${tone}`;
+    targets.push({ category: 'syllables', itemId });
+    for(let i=0; i<3; i++) {
+      const options = [{ base: syl, tone, isCorrect: true }];
+      while(options.length < 4) {
+        const wrongSyllable = uniqueSyllables[Math.floor(Math.random() * uniqueSyllables.length)];
+        const wrongTone = Math.floor(Math.random()*4)+1;
+        if(!options.some(opt => opt.base === wrongSyllable && opt.tone === wrongTone)) {
+          options.push({ base: wrongSyllable, tone: wrongTone, isCorrect: false });
+        }
+      }
+      questions.push({
+        correctBase: syl,
+        correctTone: tone,
+        options: options.sort(() => Math.random() - 0.5),
+        target: { category: 'syllables', itemId }
+      });
+    }
+  });
+
+  // Xáo trộn toàn bộ 24 câu hỏi
+  const shuffledQuestions = questions.sort(() => Math.random() - 0.5).map((q, idx) => ({ ...q, id: idx + 1 }));
+  
+  return { questions: shuffledQuestions, targets };
+};

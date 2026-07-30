@@ -136,12 +136,69 @@ export const ProgressProvider = ({ children }) => {
     return progress[category][itemId];
   };
 
+  const getGlobalProgressPercentage = () => {
+    if (!progress) return 0;
+    const totalItems = 21 + 36 + 4 + 1600 + 20 + 4 + 3; // 1688
+    let currentScore = 0;
+    ['initials', 'finals', 'tones', 'syllables', 'tonePairs', 'spellingRules', 'sandhiRules'].forEach(cat => {
+      if (progress[cat]) {
+        Object.values(progress[cat]).forEach(val => {
+          currentScore += Math.min(3, val); // Capped at Level 3 for 100% logic
+        });
+      }
+    });
+    const maxScore = totalItems * 3;
+    if (maxScore === 0) return 0;
+    let pct = (currentScore / maxScore) * 100;
+    if (pct > 0 && pct < 1) pct = Number(pct.toFixed(2));
+    else pct = Math.floor(pct); // Always floor so 99.9% doesn't round up to 100%
+    return pct;
+  };
+
+  const processExamResults = async (results, passed) => {
+    if (!currentUser || !progress) return;
+    
+    let newProgress = { ...progress };
+    let hasChanges = false;
+    
+    results.forEach(result => {
+      const { category, itemId, correctCount, totalCount } = result;
+      const currentLevel = newProgress[category]?.[itemId] || 0;
+      
+      if (correctCount < totalCount) {
+        // Sai 1 câu trở lên -> Phạt tụt về level 2
+        if (currentLevel > 2) {
+          if (!newProgress[category]) newProgress[category] = {};
+          newProgress[category] = { ...newProgress[category], [itemId]: 2 };
+          hasChanges = true;
+        }
+      } else if (correctCount === totalCount && passed) {
+        // Đúng toàn bộ 3/3 và thi đậu -> Lên Level 4 (Ra quả)
+        if (!newProgress[category]) newProgress[category] = {};
+        newProgress[category] = { ...newProgress[category], [itemId]: 4 };
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      setProgress(newProgress);
+      try {
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        await setDoc(userDocRef, { progress: newProgress }, { merge: true });
+      } catch (error) {
+        console.error("Lỗi cập nhật kết quả bài thi:", error);
+      }
+    }
+  };
+
   const value = {
     progress,
     loading,
     updateScore,
     promoteToLevel4,
-    getLevel
+    getLevel,
+    getGlobalProgressPercentage,
+    processExamResults
   };
 
   return (

@@ -6,7 +6,7 @@ import TreeIcon from './TreeIcon';
 import { X } from 'lucide-react';
 
 export default function ProgressDashboard() {
-  const { progress, getLevel, loading } = useProgress();
+  const { progress, getLevel, getGlobalProgressPercentage, loading } = useProgress();
   const [selectedLevel, setSelectedLevel] = useState(null);
 
   if (loading) {
@@ -52,25 +52,7 @@ export default function ProgressDashboard() {
     };
   };
 
-  const calculateOverallProgress = () => {
-    if (!progress) return 0;
-    let currentScore = 0;
-    
-    ['initials', 'finals', 'tones', 'syllables', 'tonePairs', 'spellingRules', 'sandhiRules'].forEach(cat => {
-      if (progress[cat]) {
-        Object.keys(progress[cat]).forEach(key => {
-          currentScore += Math.min(3, progress[cat][key]);
-        });
-      }
-    });
-    
-    const maxScore = totalItems * 3;
-    if (maxScore === 0) return 0;
-    
-    const pct = (currentScore / maxScore) * 100;
-    if (pct > 0 && pct < 1) return pct.toFixed(2);
-    return Math.round(pct);
-  };
+  const overallProgress = getGlobalProgressPercentage();
 
   const initStats = calculateCategoryProgress('initials', totalInitials);
   const finStats = calculateCategoryProgress('finals', totalFinals);
@@ -79,7 +61,6 @@ export default function ProgressDashboard() {
   const pairStats = calculateCategoryProgress('tonePairs', totalTonePairs);
   const spellStats = calculateCategoryProgress('spellingRules', totalSpellingRules);
   const sandhiStats = calculateCategoryProgress('sandhiRules', totalSandhiRules);
-  const overallProgress = calculateOverallProgress();
 
   // --- LOGIC CHO MODAL VÒNG TRÒN DƯỚI CÙNG (NHÓM THEO LEVEL) ---
   const getItemsForLevel = (level) => {
@@ -166,8 +147,30 @@ export default function ProgressDashboard() {
         </div>
         <div className="text-right">
           <div className="text-4xl font-black text-emerald-500">{overallProgress}%</div>
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Hoàn thành</div>
+          <div className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-wider">Tổng Tiến Độ</div>
         </div>
+      </div>
+      
+      {/* Nút Thi Cuối Kỳ */}
+      <div className="px-6 py-4 bg-white border-b border-slate-100 flex justify-center">
+        <button 
+          onClick={() => {
+            if (overallProgress < 100) {
+              alert("Bé cần đạt 100% tiến độ khu vườn (tất cả các cây đều nở hoa) để mở khóa Kỳ thi Cuối kỳ nhé!");
+            } else {
+              // Trigger event or context to open exam mode
+              window.dispatchEvent(new CustomEvent('start-final-exam'));
+            }
+          }}
+          className={`px-8 py-3 rounded-xl font-black flex items-center gap-2 transition-all ${
+            overallProgress >= 100 
+              ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-lg hover:shadow-rose-500/30 hover:-translate-y-0.5 cursor-pointer animate-pulse' 
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+          }`}
+        >
+          <TreeIcon level={4} />
+          THI CUỐI KỲ (RA QUẢ)
+        </button>
       </div>
 
       {/* Tabs */}

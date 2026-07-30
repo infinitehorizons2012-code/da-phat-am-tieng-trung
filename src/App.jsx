@@ -6,6 +6,7 @@ import ToneMatrix from './components/ToneMatrix';
 import PinyinSummary from './components/PinyinSummary';
 import ToneSandhiRules from './components/ToneSandhiRules';
 import ProgressDashboard from './components/ProgressDashboard';
+import FinalExamMode from './components/FinalExamMode';
 import LoginModal from './components/LoginModal';
 import { useAuth } from './context/AuthContext';
 import { Volume2, Play, Grid, Headphones, LayoutGrid, BookOpen, Zap, User, LogOut, TreePine, Trash2 } from 'lucide-react';
@@ -15,6 +16,12 @@ function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   
   const { currentUser, logout, deleteAccount } = useAuth();
+
+  useEffect(() => {
+    const handleStartExam = () => setActiveTab('exam');
+    window.addEventListener('start-final-exam', handleStartExam);
+    return () => window.removeEventListener('start-final-exam', handleStartExam);
+  }, []);
 
   const handleDeleteAccount = async () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa tài khoản và toàn bộ quá trình học tập không? Thao tác này không thể hoàn tác!")) {
@@ -208,6 +215,11 @@ function App() {
             {activeTab === 'progress' && (
               <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100">
                 <ProgressDashboard />
+              </div>
+            )}
+            {activeTab === 'exam' && (
+              <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100">
+                <FinalExamMode onExit={() => setActiveTab('progress')} />
               </div>
             )}
 
