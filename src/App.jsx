@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import PinyinTable from './components/PinyinTable';
 import TonePairPractice from './components/TonePairPractice';
 import QuizMode from './components/QuizMode';
-import { Volume2, Play, Grid, Headphones } from 'lucide-react';
+import ToneMatrix from './components/ToneMatrix';
+import { Volume2, Play, Grid, Headphones, LayoutGrid } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('table');
@@ -31,6 +32,13 @@ function App() {
             >
               <Grid size={16} />
               <span className="hidden sm:inline">Tra cứu</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('tone-matrix')}
+              className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'tone-matrix' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <LayoutGrid size={16} />
+              <span className="hidden sm:inline">Ma trận âm điệu</span>
             </button>
             <button 
               onClick={() => setActiveTab('tone-pair')}
@@ -84,6 +92,12 @@ function App() {
                   <PinyinTable />
                 </div>
               </>
+            ) : activeTab === 'tone-matrix' ? (
+              <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 flex items-start justify-center">
+                <div className="w-full max-w-6xl h-full flex">
+                  <ToneMatrix />
+                </div>
+              </div>
             ) : activeTab === 'tone-pair' ? (
               <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 flex items-start justify-center">
                 <div className="w-full max-w-5xl">
