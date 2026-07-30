@@ -74,27 +74,9 @@ export const playPinyinAudio = (text, onEnd, onStatus) => {
   
   const tryNext = () => {
     if (currentTry >= cdnList.length) {
-      console.warn("Tất cả máy chủ MP3 đều lỗi hoặc thiếu file. Dùng TTS dự phòng.");
-      if (onStatus) onStatus('Google TTS');
-      // Dùng lại Google TTS làm phương án chống cháy cuối cùng (ít nhất vẫn ra tiếng)
-      const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=zh-CN&client=tw-ob`;
-      const fallbackAudio = new Audio(fallbackUrl);
-      currentAudio = fallbackAudio;
-      
-      fallbackAudio.addEventListener('ended', () => { if (onEnd) onEnd(); });
-      fallbackAudio.addEventListener('error', () => {
-        if (onStatus) onStatus('SpeechSynthesis');
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'zh-CN';
-          if (onEnd) utterance.onend = onEnd;
-          window.speechSynthesis.speak(utterance);
-        } else {
-          if (onEnd) onEnd();
-        }
-      });
-      fallbackAudio.play().catch(() => { if (onEnd) onEnd(); });
+      console.warn(`Không tìm thấy file MP3 cho ${text}.`);
+      if (onStatus) onStatus('Không có dữ liệu âm thanh (404)');
+      if (onEnd) onEnd();
       return;
     }
     
