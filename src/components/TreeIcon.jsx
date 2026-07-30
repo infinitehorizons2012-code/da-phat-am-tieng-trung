@@ -9,6 +9,8 @@ export default function TreeIcon({ level, className = "" }) {
   // Level 4: Cây có quả (Đã thi qua)
   
   const getIconAndColor = () => {
+    if (level === undefined) return { Icon: 'none', color: "", title: "" };
+    
     switch(level) {
       case 1:
         return { Icon: Leaf, color: "text-emerald-400", title: "Mầm non (Level 1)" };
@@ -25,6 +27,10 @@ export default function TreeIcon({ level, className = "" }) {
   };
 
   const { Icon, color, title } = getIconAndColor();
+
+  if (Icon === 'none') {
+    return null;
+  }
 
   if (!Icon) {
     return (

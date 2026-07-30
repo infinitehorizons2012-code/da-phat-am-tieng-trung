@@ -132,8 +132,8 @@ export const ProgressProvider = ({ children }) => {
   };
 
   const getLevel = (category, itemId) => {
-    if (!progress || !progress[category]) return 0;
-    return progress[category][itemId] || 0;
+    if (!progress || !progress[category] || progress[category][itemId] === undefined) return undefined;
+    return progress[category][itemId];
   };
 
   const value = {
