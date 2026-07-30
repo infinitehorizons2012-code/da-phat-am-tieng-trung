@@ -19,15 +19,15 @@ export default function QuizMode() {
   // Khởi tạo vòng mới
   const startNewRound = (newMode = mode) => {
     if (newMode === 'confusing') {
-      setQuestions(generateQuizRound(10));
+      setQuestions(generateQuizRound(10, progress));
     } else if (newMode === 'tone') {
-      setQuestions(generateToneQuizRound(10));
+      setQuestions(generateToneQuizRound(10, progress));
     } else if (newMode === 'tonepair') {
       setQuestions(generateTonePairQuizRound(10, progress));
     } else if (newMode === 'spelling') {
-      setQuestions(generateSpellingQuizRound(10));
+      setQuestions(generateSpellingQuizRound(10, progress));
     } else {
-      setQuestions(generateRandomQuizRound(10));
+      setQuestions(generateRandomQuizRound(10, progress));
     }
     setCurrentIdx(0);
     setSelectedOption(null);

@@ -57,18 +57,61 @@ export const confusingSets = [
   ['ju', 'qu']
 ];
 
-// Hàm tạo 10 câu hỏi ngẫu nhiên cho một vòng
-export const generateQuizRound = (numQuestions = 10) => {
+const reverseMap = {};
+for (const initial in pinyinMatrix) {
+  for (const final in pinyinMatrix[initial]) {
+    const syllable = pinyinMatrix[initial][final];
+    allValidSyllables.push(syllable);
+    reverseMap[syllable] = { initial, final };
+  }
+}
+// Loại bỏ trùng lặp nếu có
+const uniqueSyllables = [...new Set(allValidSyllables)];
+
+// Trọng số chung cho SRS
+const getWeight = (level) => {
+  switch (level) {
+    case 0: return 10;
+    case 1: return 7;
+    case 2: return 4;
+    case 3: return 1;
+    case 4: return 1;
+    default: return 10;
+  }
+};
+
+// Hàm tạo 10 câu hỏi ngẫu nhiên cho một vòng (Âm dễ nhầm)
+export const generateQuizRound = (numQuestions = 10, progress = null) => {
   const questions = [];
-  const usedPairs = new Set();
   
-  while (questions.length < numQuestions) {
-    // 1. Chọn ngẫu nhiên một cặp âm dễ nhầm
-    const pairIndex = Math.floor(Math.random() * confusingSets.length);
-    if (usedPairs.has(pairIndex)) continue;
-    usedPairs.add(pairIndex);
+  // Sắp xếp các cặp dễ nhầm theo trọng số (Weighted Random Shuffle)
+  const shuffledPairs = [...confusingSets].sort((a, b) => {
+    const getPairLevel = (pair) => {
+      let minLevel = 4;
+      for (const syl of pair) {
+        const parts = reverseMap[syl];
+        if (parts) {
+          if (parts.initial && parts.initial !== 'none') {
+            minLevel = Math.min(minLevel, progress?.initials?.[parts.initial] ?? 0);
+          }
+          if (parts.final) {
+            minLevel = Math.min(minLevel, progress?.finals?.[parts.final] ?? 0);
+          }
+        }
+      }
+      return minLevel;
+    };
     
-    const pair = confusingSets[pairIndex];
+    const levelA = getPairLevel(a);
+    const levelB = getPairLevel(b);
+    
+    return (Math.random() * getWeight(levelB)) - (Math.random() * getWeight(levelA));
+  });
+
+  const selectedPairs = shuffledPairs.slice(0, numQuestions);
+  
+  for (let i = 0; i < selectedPairs.length; i++) {
+    const pair = selectedPairs[i];
     
     // 2. Chọn ngẫu nhiên đáp án đúng từ cặp đó (0 hoặc 1)
     const correctSyllable = pair[Math.floor(Math.random() * 2)];
@@ -82,10 +125,6 @@ export const generateQuizRound = (numQuestions = 10) => {
     }
     
     // 4. Tạo 4 đáp án (Options)
-    // - Đáp án 1: Âm đúng + Thanh đúng (Correct)
-    // - Đáp án 2: Âm sai + Thanh đúng
-    // - Đáp án 3: Âm đúng + Thanh sai
-    // - Đáp án 4: Âm sai + Thanh sai
     const options = [
       { base: correctSyllable, tone: correctTone, isCorrect: true },
       { base: confusingSyllable, tone: correctTone, isCorrect: false },
@@ -106,33 +145,35 @@ export const generateQuizRound = (numQuestions = 10) => {
   
   return questions;
 };
-
-import { pinyinMatrix } from './pinyinData';
-
-// Trích xuất tất cả các âm tiết hợp lệ từ pinyinMatrix
-const allValidSyllables = [];
-for (const initial in pinyinMatrix) {
-  for (const final in pinyinMatrix[initial]) {
-    allValidSyllables.push(pinyinMatrix[initial][final]);
-  }
-}
 // Loại bỏ trùng lặp nếu có
 const uniqueSyllables = [...new Set(allValidSyllables)];
 
-// Hàm tạo 10 câu hỏi ngẫu nhiên từ toàn bộ các âm Pinyin
-export const generateRandomQuizRound = (numQuestions = 10) => {
+// Tạo sẵn mảng 1632 tổ hợp âm tiết + thanh điệu
+const allSyllableTones = [];
+for (const syllable of uniqueSyllables) {
+  for (let tone = 1; tone <= 4; tone++) {
+    allSyllableTones.push({ base: syllable, tone: tone });
+  }
+}
+
+// Hàm tạo 10 câu hỏi ngẫu nhiên từ toàn bộ các âm Pinyin (Có áp dụng SRS)
+export const generateRandomQuizRound = (numQuestions = 10, progress = null) => {
   const questions = [];
-  const usedWords = new Set();
   
-  while (questions.length < numQuestions) {
-    // 1. Chọn ngẫu nhiên 1 đáp án đúng
-    const correctIdx = Math.floor(Math.random() * uniqueSyllables.length);
-    const correctSyllable = uniqueSyllables[correctIdx];
-    const correctTone = Math.floor(Math.random() * 4) + 1; // 1-4
-    const wordKey = `${correctSyllable}${correctTone}`;
+  const shuffledPool = [...allSyllableTones].sort((a, b) => {
+    const keyA = `${a.base}${a.tone}`;
+    const keyB = `${b.base}${b.tone}`;
+    const levelA = progress?.syllables?.[keyA] || 0;
+    const levelB = progress?.syllables?.[keyB] || 0;
     
-    if (usedWords.has(wordKey)) continue;
-    usedWords.add(wordKey);
+    return (Math.random() * getWeight(levelB)) - (Math.random() * getWeight(levelA));
+  });
+
+  const selected = shuffledPool.slice(0, numQuestions);
+  
+  for (let i = 0; i < selected.length; i++) {
+    const correctSyllable = selected[i].base;
+    const correctTone = selected[i].tone;
     
     // 2. Chọn ngẫu nhiên 3 đáp án sai (đảm bảo không trùng với đáp án đúng và không trùng nhau)
     const options = [
@@ -165,19 +206,29 @@ export const generateRandomQuizRound = (numQuestions = 10) => {
   return questions;
 };
 
-// Hàm tạo 10 câu hỏi để nghe phân biệt thanh điệu
-export const generateToneQuizRound = (numQuestions = 10) => {
+// Hàm tạo 10 câu hỏi để nghe phân biệt thanh điệu (Có áp dụng SRS)
+export const generateToneQuizRound = (numQuestions = 10, progress = null) => {
   const questions = [];
   const usedSyllables = new Set();
   
   while (questions.length < numQuestions) {
-    const correctIdx = Math.floor(Math.random() * uniqueSyllables.length);
-    const correctSyllable = uniqueSyllables[correctIdx];
+    // Lựa chọn tone ưu tiên theo tiến độ SRS
+    const sortedTones = [1, 2, 3, 4].sort((a, b) => {
+      const levelA = progress?.tones?.[a.toString()] || 0;
+      const levelB = progress?.tones?.[b.toString()] || 0;
+      return (Math.random() * getWeight(levelB)) - (Math.random() * getWeight(levelA));
+    });
     
-    if (usedSyllables.has(correctSyllable)) continue;
-    usedSyllables.add(correctSyllable);
+    const correctTone = sortedTones[0];
     
-    const correctTone = Math.floor(Math.random() * 4) + 1; // 1-4
+    let correctSyllable;
+    while(true) {
+      correctSyllable = uniqueSyllables[Math.floor(Math.random() * uniqueSyllables.length)];
+      if (!usedSyllables.has(correctSyllable)) {
+        usedSyllables.add(correctSyllable);
+        break;
+      }
+    }
     
     // Đáp án luôn cố định là 4 thanh
     const options = [
@@ -355,18 +406,6 @@ const tonePairWords = [
 export const generateTonePairQuizRound = (numQuestions = 10, progress = null) => {
   const questions = [];
   
-  // Trọng số theo cấp độ (Ưu tiên từ chưa học hoặc cấp thấp)
-  const getWeight = (level) => {
-    switch (level) {
-      case 0: return 10; // Chưa nảy mầm -> Xuất hiện nhiều nhất
-      case 1: return 7;  // Mầm non
-      case 2: return 4;  // Cây nhỏ
-      case 3: return 1;  // Đã nở hoa -> Xuất hiện ít nhất
-      case 4: return 1;  // Đã có quả
-      default: return 10;
-    }
-  };
-  
   // Shuffle tonePairWords theo trọng số (Weighted Random Shuffle)
   const shuffledWords = [...tonePairWords].sort((a, b) => {
     const pairKeyA = `${a.tones[0]}-${a.tones[1]}`;
@@ -463,12 +502,16 @@ const spellingRulesData = [
   { ruleId: 'Luật u đứng đầu', formula: '∅ + uang', correct: 'wang', wrong: ['uang', 'wuang', 'uwang'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' }
 ];
 
-// Hàm tạo 10 câu hỏi Trắc nghiệm Chính tả
-export const generateSpellingQuizRound = (numQuestions = 10) => {
+// Hàm tạo 10 câu hỏi Trắc nghiệm Chính tả (Có áp dụng SRS)
+export const generateSpellingQuizRound = (numQuestions = 10, progress = null) => {
   const questions = [];
   
-  // Trộn ngẫu nhiên mảng spellingRulesData
-  const shuffledRules = [...spellingRulesData].sort(() => Math.random() - 0.5);
+  // Trộn ngẫu nhiên mảng spellingRulesData theo trọng số SRS
+  const shuffledRules = [...spellingRulesData].sort((a, b) => {
+    const levelA = progress?.spellingRules?.[a.ruleId] || 0;
+    const levelB = progress?.spellingRules?.[b.ruleId] || 0;
+    return (Math.random() * getWeight(levelB)) - (Math.random() * getWeight(levelA));
+  });
   
   // Lấy ra số lượng câu hỏi mong muốn
   const selectedRules = shuffledRules.slice(0, numQuestions);
