@@ -149,9 +149,10 @@ export default function TonePairPractice() {
             <optgroup key={groupLabel} label={groupLabel}>
               {pairs.map((pair, idx) => {
                 const pinyinStr = pair.word.map((w, i) => `${w}${pair.tones[i]}`).join(' ');
+                const meaning = commonDictionary[pinyinStr] || '';
                 return (
                   <option key={idx} value={pinyinStr}>
-                    {pinyinStr}
+                    {pinyinStr} {meaning ? `- ${meaning}` : ''}
                   </option>
                 );
               })}
