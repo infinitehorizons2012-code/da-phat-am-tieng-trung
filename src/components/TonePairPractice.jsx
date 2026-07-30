@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Play, RotateCcw } from 'lucide-react';
 import { parsePinyinString, applyToneSandhi, playContinuousSequence, applyTone } from '../utils/pinyinUtils';
 import { commonDictionary } from '../data/dictionaryData';
+import { tonePairWords } from '../data/quizData';
 
 export default function TonePairPractice() {
-  const [inputText, setInputText] = useState('ni3 hao3 yi1 ge4 bu4 hao3');
+  const [inputText, setInputText] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingIndex, setPlayingIndex] = useState(-1);
   const [groups, setGroups] = useState([]);
@@ -114,7 +115,7 @@ export default function TonePairPractice() {
   // Gọi parse lần đầu khi component mount
   React.useEffect(() => {
     handleParseOnly();
-  }, []);
+  }, [inputText]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6 mb-2 mx-4 sm:mx-0">
@@ -129,19 +130,34 @@ export default function TonePairPractice() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 items-stretch">
-        <input
-          type="text"
+        <select
           value={inputText}
           onChange={(e) => {
             setInputText(e.target.value);
           }}
-          onBlur={handleParseOnly}
-          placeholder="Nhập pinyin kèm số, ví dụ: ni3 hao3 yi1 ding4"
-          className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handlePlayAll();
-          }}
-        />
+          className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono appearance-none cursor-pointer"
+        >
+          <option value="" disabled>-- Chọn một cặp từ ghép để luyện tập --</option>
+          {Object.entries(
+            tonePairWords.reduce((acc, pair) => {
+              const key = `Thanh ${pair.tones[0]} + Thanh ${pair.tones[1]}`;
+              if (!acc[key]) acc[key] = [];
+              acc[key].push(pair);
+              return acc;
+            }, {})
+          ).map(([groupLabel, pairs]) => (
+            <optgroup key={groupLabel} label={groupLabel}>
+              {pairs.map((pair, idx) => {
+                const pinyinStr = pair.word.map((w, i) => `${w}${pair.tones[i]}`).join(' ');
+                return (
+                  <option key={idx} value={pinyinStr}>
+                    {pinyinStr}
+                  </option>
+                );
+              })}
+            </optgroup>
+          ))}
+        </select>
         <button
           onClick={handlePlayAll}
           disabled={isPlaying || !inputText.trim()}

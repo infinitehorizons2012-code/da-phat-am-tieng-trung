@@ -252,7 +252,7 @@ export const generateToneQuizRound = (numQuestions = 10, progress = null) => {
 };
 
 // Dữ liệu các từ ghép (đặc biệt chú trọng biến điệu)
-const tonePairWords = [
+export const tonePairWords = [
   // 1-1
   { word: ['ka', 'fei'], tones: [1, 1], sandhiTones: [1, 1] },
   { word: ['fei', 'ji'], tones: [1, 1], sandhiTones: [1, 1] },
