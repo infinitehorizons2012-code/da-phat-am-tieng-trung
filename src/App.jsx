@@ -3,7 +3,8 @@ import PinyinTable from './components/PinyinTable';
 import TonePairPractice from './components/TonePairPractice';
 import QuizMode from './components/QuizMode';
 import ToneMatrix from './components/ToneMatrix';
-import { Volume2, Play, Grid, Headphones, LayoutGrid } from 'lucide-react';
+import PinyinSummary from './components/PinyinSummary';
+import { Volume2, Play, Grid, Headphones, LayoutGrid, BookOpen } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('table');
@@ -26,6 +27,13 @@ function App() {
           
           {/* Tabs Navigation */}
           <div className="flex bg-slate-100 p-1 rounded-lg">
+            <button 
+              onClick={() => setActiveTab('summary')}
+              className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'summary' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <BookOpen size={16} />
+              <span className="hidden sm:inline">Tổng hợp</span>
+            </button>
             <button 
               onClick={() => setActiveTab('table')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'table' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
@@ -61,7 +69,13 @@ function App() {
         <main className="min-h-0 flex flex-col w-full mx-auto max-w-none overflow-hidden animate-in fade-in duration-300">
           <div className="flex min-h-0 flex-1 flex-col">
             
-            {activeTab === 'table' ? (
+            {activeTab === 'summary' ? (
+              <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 flex items-start justify-center">
+                <div className="w-full h-full flex">
+                  <PinyinSummary />
+                </div>
+              </div>
+            ) : activeTab === 'table' ? (
               <>
                 {/* Legend (Chú giải) */}
                 <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4 text-xs font-bold text-slate-500">
