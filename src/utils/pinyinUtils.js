@@ -125,6 +125,7 @@ export const stopAudio = () => {
     globalAudio.pause();
     globalAudio.onended = null;
     globalAudio.onerror = null;
+    globalAudio.ontimeupdate = null;
     // Không xoá src hoặc currentTime để tránh lỗi DOMException trên một số trình duyệt
   }
 };
@@ -209,18 +210,20 @@ export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus)
       // Hoặc nếu muốn cắt sớm (crossfade/overlap):
       // Nếu không phải âm cuối, ta ngắt sớm một chút (trước khi kết thúc) để nối âm tiếp theo
       if (currentIndex < tokens.length - 1) {
-        globalAudio.addEventListener('timeupdate', function onTimeUpdate() {
+        globalAudio.ontimeupdate = function() {
           const duration = this.duration || 0.8;
           // Ngắt sớm 0.2s trước khi kết thúc để nối âm mượt mà
           const cutTime = Math.max(0.1, duration - 0.2);
           if (this.currentTime >= cutTime) {
-            this.removeEventListener('timeupdate', onTimeUpdate);
+            this.ontimeupdate = null;
             // Huỷ onended để tránh gọi 2 lần playNext
             this.onended = null;
             currentIndex++;
             playNext();
           }
-        });
+        };
+      } else {
+        globalAudio.ontimeupdate = null;
       }
     }
   };
