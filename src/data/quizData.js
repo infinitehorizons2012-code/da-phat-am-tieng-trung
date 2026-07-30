@@ -60,10 +60,14 @@ export const confusingSets = [
 // Hàm tạo 10 câu hỏi ngẫu nhiên cho một vòng
 export const generateQuizRound = (numQuestions = 10) => {
   const questions = [];
+  const usedPairs = new Set();
   
-  for (let i = 0; i < numQuestions; i++) {
+  while (questions.length < numQuestions) {
     // 1. Chọn ngẫu nhiên một cặp âm dễ nhầm
     const pairIndex = Math.floor(Math.random() * confusingSets.length);
+    if (usedPairs.has(pairIndex)) continue;
+    usedPairs.add(pairIndex);
+    
     const pair = confusingSets[pairIndex];
     
     // 2. Chọn ngẫu nhiên đáp án đúng từ cặp đó (0 hoặc 1)
@@ -93,7 +97,7 @@ export const generateQuizRound = (numQuestions = 10) => {
     const shuffledOptions = options.sort(() => Math.random() - 0.5);
     
     questions.push({
-      id: i + 1,
+      id: questions.length + 1,
       correctBase: correctSyllable,
       correctTone: correctTone,
       options: shuffledOptions
@@ -118,12 +122,17 @@ const uniqueSyllables = [...new Set(allValidSyllables)];
 // Hàm tạo 10 câu hỏi ngẫu nhiên từ toàn bộ các âm Pinyin
 export const generateRandomQuizRound = (numQuestions = 10) => {
   const questions = [];
+  const usedWords = new Set();
   
-  for (let i = 0; i < numQuestions; i++) {
+  while (questions.length < numQuestions) {
     // 1. Chọn ngẫu nhiên 1 đáp án đúng
     const correctIdx = Math.floor(Math.random() * uniqueSyllables.length);
     const correctSyllable = uniqueSyllables[correctIdx];
     const correctTone = Math.floor(Math.random() * 4) + 1; // 1-4
+    const wordKey = `${correctSyllable}${correctTone}`;
+    
+    if (usedWords.has(wordKey)) continue;
+    usedWords.add(wordKey);
     
     // 2. Chọn ngẫu nhiên 3 đáp án sai (đảm bảo không trùng với đáp án đúng và không trùng nhau)
     const options = [
@@ -146,7 +155,7 @@ export const generateRandomQuizRound = (numQuestions = 10) => {
     const shuffledOptions = options.sort(() => Math.random() - 0.5);
     
     questions.push({
-      id: i + 1,
+      id: questions.length + 1,
       correctBase: correctSyllable,
       correctTone: correctTone,
       options: shuffledOptions
@@ -159,10 +168,15 @@ export const generateRandomQuizRound = (numQuestions = 10) => {
 // Hàm tạo 10 câu hỏi để nghe phân biệt thanh điệu
 export const generateToneQuizRound = (numQuestions = 10) => {
   const questions = [];
+  const usedSyllables = new Set();
   
-  for (let i = 0; i < numQuestions; i++) {
+  while (questions.length < numQuestions) {
     const correctIdx = Math.floor(Math.random() * uniqueSyllables.length);
     const correctSyllable = uniqueSyllables[correctIdx];
+    
+    if (usedSyllables.has(correctSyllable)) continue;
+    usedSyllables.add(correctSyllable);
+    
     const correctTone = Math.floor(Math.random() * 4) + 1; // 1-4
     
     // Đáp án luôn cố định là 4 thanh
@@ -174,7 +188,7 @@ export const generateToneQuizRound = (numQuestions = 10) => {
     ];
     
     questions.push({
-      id: i + 1,
+      id: questions.length + 1,
       correctBase: correctSyllable,
       correctTone: correctTone,
       options: options,
