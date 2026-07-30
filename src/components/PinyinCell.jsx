@@ -40,6 +40,23 @@ export default function PinyinCell({ initial, final, syllable, onActivate, onClo
     bgClass = 'hover:bg-slate-50 text-slate-700';
   }
 
+  // Tính trung bình level của 4 thanh điệu
+  let avgLevel = undefined;
+  if (syllable) {
+    let totalScore = 0;
+    let hasStudied = false;
+    for (let i = 1; i <= 4; i++) {
+      const tLevel = getLevel('syllables', syllable + i);
+      if (tLevel !== undefined) {
+        hasStudied = true;
+        totalScore += tLevel;
+      }
+    }
+    if (hasStudied) {
+      avgLevel = Math.round(totalScore / 4);
+    }
+  }
+
   return (
     <td 
       className={`pinyin-cell ${bgClass} transition-colors duration-200 cursor-pointer p-2 sm:p-3 relative text-sm sm:text-base border border-transparent hover:border-slate-200`}
@@ -52,50 +69,63 @@ export default function PinyinCell({ initial, final, syllable, onActivate, onClo
     >
       <span className={isActive ? 'font-black' : ''}>{syllable}</span>
       
+      {/* Icon trung bình của âm tiết */}
+      {avgLevel !== undefined && (
+        <TreeIcon level={avgLevel} className="absolute bottom-0 right-0 sm:bottom-0.5 sm:right-0.5 scale-50 opacity-80" />
+      )}
+      
       {isActive && (
         <div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-200 w-max z-50 overflow-hidden cursor-default"
-          onClick={(e) => e.stopPropagation()}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onClose) onClose();
+          }}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2 bg-slate-50 border-b border-slate-100">
-            <div className="text-[10px] font-black tracking-wider text-slate-400 flex items-center gap-1.5 uppercase">
-              {initial && final ? `${initial} + ${final}` : syllable}
-              {audioSource && (
-                <>
-                  <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                  <span className="text-emerald-500 lowercase">Nguồn: {audioSource}</span>
-                </>
-              )}
+          <div 
+            className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden cursor-default w-full max-w-sm animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 bg-slate-50 border-b border-slate-100">
+              <div className="text-[10px] sm:text-xs font-black tracking-wider text-slate-400 flex items-center gap-2 uppercase">
+                {initial && final ? `${initial} + ${final}` : syllable}
+                {audioSource && (
+                  <>
+                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                    <span className="text-emerald-500 lowercase">Nguồn: {audioSource}</span>
+                  </>
+                )}
+              </div>
+              <button 
+                className="text-slate-400 hover:text-rose-500 transition-colors rounded-full hover:bg-slate-200 p-1.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onClose) onClose(); 
+                }}
+              >
+                <X size={18} strokeWidth={3} />
+              </button>
             </div>
-            <button 
-              className="text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-200 p-1 -mr-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onClose) onClose(); 
-              }}
-            >
-              <X size={14} strokeWidth={3} />
-            </button>
-          </div>
 
-          {/* Tone Buttons */}
-          <div className="flex gap-2 p-3 sm:p-4 bg-white">
-            {tones.map(t => {
-              const level = getLevel('syllables', syllable + t.num);
-              return (
-                <button 
-                  key={t.num} 
-                  className="relative flex flex-col items-center justify-center min-w-[3.5rem] h-16 sm:w-16 sm:h-20 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors border border-slate-100 hover:border-rose-200 hover:text-rose-600 group" 
-                  onClick={(e) => handleToneClick(e, t.num)}
-                  title={`Thanh ${t.num}`}
-                >
-                  <TreeIcon level={level} className="absolute top-1 right-1 scale-75" />
-                  <span className="text-lg sm:text-xl font-black text-slate-700 group-hover:text-rose-600 leading-none mb-1 mt-2">{t.label}</span>
-                  <Volume2 size={14} className="text-slate-300 group-hover:text-rose-400" />
-                </button>
-              );
-            })}
+            {/* Tone Buttons */}
+            <div className="flex justify-between gap-2 p-5 bg-white">
+              {tones.map(t => {
+                const level = getLevel('syllables', syllable + t.num);
+                return (
+                  <button 
+                    key={t.num} 
+                    className="relative flex flex-col items-center justify-center w-[4.5rem] h-20 sm:w-20 sm:h-24 rounded-2xl hover:bg-slate-50 active:bg-slate-100 transition-all border border-slate-100 hover:border-rose-200 hover:shadow-sm group" 
+                    onClick={(e) => handleToneClick(e, t.num)}
+                    title={`Thanh ${t.num}`}
+                  >
+                    <TreeIcon level={level} className="absolute top-1.5 right-1.5 scale-75" />
+                    <span className="text-2xl sm:text-3xl font-black text-slate-700 group-hover:text-rose-600 leading-none mb-1 mt-2">{t.label}</span>
+                    <Volume2 size={16} className="text-slate-300 group-hover:text-rose-400 mt-1" />
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
