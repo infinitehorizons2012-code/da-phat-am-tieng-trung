@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { X, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { X, User, Lock, AlertCircle } from 'lucide-react';
 
 export default function LoginModal({ isOpen, onClose }) {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -17,28 +16,34 @@ export default function LoginModal({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (!username.trim()) {
+      setError('Vui lòng nhập tên của bé.');
+      return;
+    }
+
     setLoading(true);
+
+    // Chuyển đổi tên thành định dạng email giả cho Firebase
+    const fakeEmail = `${username.trim().toLowerCase().replace(/[^a-z0-9]/g, '')}@pinyin.app`;
+    // Padding password để qua được rào cản 6 ký tự tối thiểu của Firebase
+    const paddedPassword = `${password}App123!`;
 
     try {
       if (isLogin) {
-        await login(email, password);
+        await login(fakeEmail, paddedPassword);
       } else {
-        if (!displayName) {
-          throw new Error('Vui lòng nhập tên của con');
-        }
-        await signup(email, password, displayName);
+        await signup(fakeEmail, paddedPassword, username.trim());
       }
       onClose();
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
-        setError('Email này đã được sử dụng.');
+        setError('Tên này đã có bạn khác chọn, bé hãy thử thêm số vào sau tên nhé (VD: Bún 123).');
       } else if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        setError('Email hoặc mật khẩu không đúng.');
-      } else if (err.code === 'auth/weak-password') {
-        setError('Mật khẩu quá yếu (cần ít nhất 6 ký tự).');
+        setError('Tên hoặc mật khẩu không đúng.');
       } else {
-        setError(err.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+        setError('Có lỗi xảy ra, vui lòng thử lại.');
       }
     }
 
@@ -60,12 +65,12 @@ export default function LoginModal({ isOpen, onClose }) {
         <div className="p-8">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-black text-slate-800 mb-2">
-              {isLogin ? 'Đăng Nhập' : 'Tạo Tài Khoản'}
+              {isLogin ? 'Vào Lớp Học' : 'Tạo Tài Khoản Mới'}
             </h2>
             <p className="text-sm text-slate-500">
               {isLogin 
-                ? 'Đăng nhập để xem tiến độ trồng cây Pinyin của con' 
-                : 'Tạo tài khoản để bắt đầu hành trình gieo hạt Pinyin'}
+                ? 'Nhập tên của bé để xem tiến độ trồng cây Pinyin' 
+                : 'Đăng ký tài khoản cực nhanh chỉ cần tên và mật khẩu'}
             </p>
           </div>
 
@@ -77,45 +82,25 @@ export default function LoginModal({ isOpen, onClose }) {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Tên của con</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <User size={18} />
-                  </div>
-                  <input 
-                    type="text" 
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all font-medium"
-                    placeholder="VD: Bé Bún"
-                    required={!isLogin}
-                  />
-                </div>
-              </div>
-            )}
-
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Tên của bé (Viết liền không dấu)</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                  <Mail size={18} />
+                  <User size={18} />
                 </div>
                 <input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text" 
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all font-medium"
-                  placeholder="email@example.com"
+                  placeholder="VD: bebun"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Mật khẩu</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Mật khẩu (có thể dùng 1234...)</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <Lock size={18} />
@@ -125,9 +110,9 @@ export default function LoginModal({ isOpen, onClose }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all font-medium"
-                  placeholder="••••••••"
+                  placeholder="••••"
                   required
-                  minLength={6}
+                  minLength={4}
                 />
               </div>
             </div>
@@ -140,13 +125,13 @@ export default function LoginModal({ isOpen, onClose }) {
               {loading ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               ) : (
-                isLogin ? 'Đăng Nhập' : 'Tạo Tài Khoản'
+                isLogin ? 'Vào Lớp Ngay' : 'Tạo Tài Khoản'
               )}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm font-medium text-slate-500">
-            {isLogin ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? '}
+            {isLogin ? 'Bé chưa có tài khoản? ' : 'Bé đã có tài khoản? '}
             <button 
               type="button"
               onClick={() => {
@@ -155,7 +140,7 @@ export default function LoginModal({ isOpen, onClose }) {
               }}
               className="text-rose-600 hover:text-rose-700 font-bold hover:underline"
             >
-              {isLogin ? 'Đăng ký ngay' : 'Đăng nhập'}
+              {isLogin ? 'Đăng ký nhanh' : 'Đăng nhập ngay'}
             </button>
           </div>
         </div>
