@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { generateQuizRound, generateRandomQuizRound, generateToneQuizRound } from '../data/quizData';
-import { applyTone, playPinyinAudio } from '../utils/pinyinUtils';
+import { generateQuizRound, generateRandomQuizRound, generateToneQuizRound, generateTonePairQuizRound } from '../data/quizData';
+import { applyTone, playPinyinAudio, playContinuousSequence, applyToneSandhi } from '../utils/pinyinUtils';
 import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe } from 'lucide-react';
 
 export default function QuizMode() {
@@ -18,6 +18,8 @@ export default function QuizMode() {
       setQuestions(generateQuizRound(10));
     } else if (newMode === 'tone') {
       setQuestions(generateToneQuizRound(10));
+    } else if (newMode === 'tonepair') {
+      setQuestions(generateTonePairQuizRound(10));
     } else {
       setQuestions(generateRandomQuizRound(10));
     }
@@ -41,8 +43,23 @@ export default function QuizMode() {
   const playAudio = () => {
     if (!currentQuestion) return;
     setIsPlaying(true);
-    const textToRead = applyTone(currentQuestion.correctBase, currentQuestion.correctTone);
-    playPinyinAudio(textToRead, () => setIsPlaying(false));
+    
+    if (currentQuestion.isTonePairMode) {
+      // Logic phát 2 âm ghép nối tiếp có biến điệu
+      const baseTokens = currentQuestion.correctWord.map((base, idx) => ({
+        base,
+        tone: currentQuestion.correctTones[idx],
+        displayTone: currentQuestion.correctTones[idx]
+      }));
+      
+      const tokensWithSandhi = applyToneSandhi(baseTokens);
+      
+      playContinuousSequence(tokensWithSandhi, null, () => setIsPlaying(false));
+      
+    } else {
+      const textToRead = applyTone(currentQuestion.correctBase, currentQuestion.correctTone);
+      playPinyinAudio(textToRead, () => setIsPlaying(false));
+    }
   };
 
   // Tự động phát âm thanh khi chuyển câu
@@ -139,6 +156,14 @@ export default function QuizMode() {
             <span className="hidden sm:inline">Phân biệt thanh điệu</span>
             <span className="sm:hidden">Thanh điệu</span>
           </button>
+          <button 
+            onClick={() => handleModeChange('tonepair')}
+            className={`whitespace-nowrap flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'tonepair' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Headphones size={14} />
+            <span className="hidden sm:inline">Cặp từ ghép (Biến điệu)</span>
+            <span className="sm:hidden">Từ ghép</span>
+          </button>
         </div>
 
         <div className="font-bold text-slate-500 text-sm w-full sm:w-auto text-right">
@@ -147,16 +172,16 @@ export default function QuizMode() {
       </div>
       <div className="w-full bg-slate-100 h-2">
         <div 
-          className={`${mode === 'all' ? 'bg-purple-500' : mode === 'tone' ? 'bg-emerald-500' : 'bg-blue-500'} h-2 transition-all duration-300`} 
+          className={`${mode === 'all' ? 'bg-purple-500' : mode === 'tone' ? 'bg-emerald-500' : mode === 'tonepair' ? 'bg-amber-500' : 'bg-blue-500'} h-2 transition-all duration-300`} 
           style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
         ></div>
       </div>
 
       <div className="flex flex-col md:flex-row p-6 gap-6 md:gap-8 items-stretch">
         {/* Left Panel (Audio Playback) */}
-        <div className={`w-full md:w-1/3 ${mode === 'all' ? 'bg-purple-600' : mode === 'tone' ? 'bg-emerald-600' : 'bg-blue-600'} rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group cursor-pointer transition-colors`} onClick={playAudio}>
+        <div className={`w-full md:w-1/3 ${mode === 'all' ? 'bg-purple-600' : mode === 'tone' ? 'bg-emerald-600' : mode === 'tonepair' ? 'bg-amber-500' : 'bg-blue-600'} rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group cursor-pointer transition-colors`} onClick={playAudio}>
           <div className="absolute top-4 bg-white/20 px-3 py-1 rounded-full text-white text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-            {mode === 'tone' ? 'TONE DRILL' : 'PINYIN DRILL'}
+            {mode === 'tone' ? 'TONE DRILL' : mode === 'tonepair' ? 'SANDHI DRILL' : 'PINYIN DRILL'}
           </div>
           
           <div className={`w-24 h-24 rounded-full border-4 border-white/20 flex items-center justify-center mb-6 transition-transform duration-300 ${isPlaying ? 'scale-110 bg-white/10' : ''}`}>
@@ -166,7 +191,7 @@ export default function QuizMode() {
           <p className="text-white/80 text-sm mb-6 text-center">Nhấp loa hoặc khung này để nghe lại</p>
           
           <button 
-            className={`w-16 h-16 rounded-full bg-white flex items-center justify-center ${mode === 'all' ? 'text-purple-600' : mode === 'tone' ? 'text-emerald-600' : 'text-blue-600'} hover:scale-105 transition-all shadow-lg ${isPlaying ? 'animate-pulse' : ''}`}
+            className={`w-16 h-16 rounded-full bg-white flex items-center justify-center ${mode === 'all' ? 'text-purple-600' : mode === 'tone' ? 'text-emerald-600' : mode === 'tonepair' ? 'text-amber-600' : 'text-blue-600'} hover:scale-105 transition-all shadow-lg ${isPlaying ? 'animate-pulse' : ''}`}
             onClick={(e) => { e.stopPropagation(); playAudio(); }}
           >
             <Volume2 size={24} className={isPlaying ? 'animate-bounce' : ''} />
@@ -177,10 +202,10 @@ export default function QuizMode() {
         <div className="w-full md:w-2/3 flex flex-col">
           <div className="mb-6">
             <h3 className="text-lg font-black text-slate-800 uppercase">
-              {mode === 'tone' ? 'Chọn thanh điệu chính xác:' : 'Chọn phiên âm Pinyin đúng:'}
+              {mode === 'tone' ? 'Chọn thanh điệu chính xác:' : mode === 'tonepair' ? 'Chọn cặp thanh điệu gốc:' : 'Chọn phiên âm Pinyin đúng:'}
             </h3>
             <p className="text-xs text-slate-400 font-medium italic">
-              {mode === 'tone' ? 'Mẹo: nghe kỹ ngữ điệu cao/thấp để xác định.' : 'Lắng nghe kỹ để phân biệt các âm gần giống nhau.'}
+              {mode === 'tone' ? 'Mẹo: nghe kỹ ngữ điệu cao/thấp để xác định.' : mode === 'tonepair' ? 'Lưu ý: Bạn phải chọn thanh điệu GỐC (chính tả) của từ ghép, không phải âm biến điệu.' : 'Lắng nghe kỹ để phân biệt các âm gần giống nhau.'}
             </p>
           </div>
 
@@ -190,6 +215,10 @@ export default function QuizMode() {
                 <div className="flex items-center gap-3">
                   <span className="text-blue-500 bg-blue-100 rounded text-xl w-8 h-8 flex items-center justify-center shadow-inner font-sans leading-none pb-0.5">{opt.icon}</span>
                   <span>{opt.label}</span>
+                </div>
+              ) : currentQuestion.isTonePairMode ? (
+                <div className="flex items-center justify-center w-full">
+                  <span className="font-sans text-xl">{opt.label}</span>
                 </div>
               ) : applyTone(opt.base, opt.tone);
               
@@ -226,11 +255,40 @@ export default function QuizMode() {
           {/* Feedback & Next Button Area */}
           <div className="mt-6 flex flex-col gap-4 min-h-[6rem]">
             {isAnswered && (
-              <div className={`p-4 rounded-xl flex items-center justify-between border ${isSelectedCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'}`}>
-                <div className="flex items-center gap-3 font-bold">
-                  {isSelectedCorrect ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
-                  {isSelectedCorrect ? 'Nghe chuẩn xác! (+30 XP)' : 'Rất tiếc! Lần sau để ý kỹ hơn nhé.'}
+              <div className={`p-4 rounded-xl flex flex-col border ${isSelectedCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'}`}>
+                <div className="flex items-center justify-between font-bold">
+                  <div className="flex items-center gap-3">
+                    {isSelectedCorrect ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+                    {isSelectedCorrect ? 'Nghe chuẩn xác! (+30 XP)' : 'Rất tiếc! Lần sau để ý kỹ hơn nhé.'}
+                  </div>
                 </div>
+                
+                {/* Hiển thị chú thích thêm nếu là chế độ cặp thanh điệu */}
+                {currentQuestion.isTonePairMode && (
+                  <div className="mt-3 text-sm flex flex-col gap-1 border-t border-current/20 pt-3">
+                    {(() => {
+                      const baseTokens = currentQuestion.correctWord.map((base, idx) => ({
+                        base,
+                        tone: currentQuestion.correctTones[idx],
+                        displayTone: currentQuestion.correctTones[idx]
+                      }));
+                      const sandhiTokens = applyToneSandhi(baseTokens);
+                      const originalStr = baseTokens.map(t => applyTone(t.base, t.tone)).join(' ');
+                      const pronouncedStr = sandhiTokens.map(t => applyTone(t.base, t.displayTone)).join(' ');
+                      
+                      return (
+                        <>
+                          <div><span className="font-bold opacity-80">Pinyin gốc (Viết):</span> {originalStr}</div>
+                          {originalStr !== pronouncedStr ? (
+                            <div><span className="font-bold opacity-80">Phát âm thực tế (Biến điệu):</span> {pronouncedStr}</div>
+                          ) : (
+                            <div><span className="font-bold opacity-80">Phát âm:</span> (Không có biến điệu)</div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                )}
               </div>
             )}
             
