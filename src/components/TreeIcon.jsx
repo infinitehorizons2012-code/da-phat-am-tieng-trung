@@ -43,11 +43,25 @@ export default function TreeIcon({ level, className = "" }) {
   }
 
   if (isFlower) {
-    // Render a stacked icon: green leaves underneath, pink flower on top
+    // Custom SVG cho cây nở hoa: Cành và lá màu xanh, cánh hoa màu hồng
     return (
-      <div title={title} className={`relative flex items-center justify-center ${className}`} style={{ width: 16, height: 16 }}>
-        <Leaf size={14} className="text-emerald-500 absolute -bottom-1 -left-1" strokeWidth={2.5} />
-        <Icon size={16} className="text-pink-500 absolute top-0 right-0 z-10" strokeWidth={2.5} />
+      <div title={title} className={`flex items-center justify-center ${className}`}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Cành cây */}
+          <path d="M12 22V10" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round"/>
+          {/* Lá trái */}
+          <path d="M12 16C9.5 16 7.5 14 7.5 11.5C10 11.5 12 13.5 12 16Z" fill="#10b981"/>
+          {/* Lá phải */}
+          <path d="M12 18C14.5 18 16.5 16 16.5 13.5C14 13.5 12 15.5 12 18Z" fill="#10b981"/>
+          {/* Cánh hoa */}
+          <circle cx="12" cy="4.5" r="3.5" fill="#f472b6"/>
+          <circle cx="16.5" cy="7.5" r="3.5" fill="#f472b6"/>
+          <circle cx="14.5" cy="12" r="3.5" fill="#f472b6"/>
+          <circle cx="9.5" cy="12" r="3.5" fill="#f472b6"/>
+          <circle cx="7.5" cy="7.5" r="3.5" fill="#f472b6"/>
+          {/* Nhụy hoa */}
+          <circle cx="12" cy="8.5" r="3" fill="#fbbf24"/>
+        </svg>
       </div>
     );
   }

@@ -40,22 +40,28 @@ export default function PinyinCell({ initial, final, syllable, onActivate, onClo
     bgClass = 'hover:bg-slate-50 text-slate-700';
   }
 
-  // Tính trung bình level của 4 thanh điệu
-  let avgLevel = undefined;
+  // Lấy level của 4 thanh điệu cho syllable này
+  const toneLevels = [];
+  let hasAnyProgress = false;
   if (syllable) {
-    let totalScore = 0;
-    let hasStudied = false;
     for (let i = 1; i <= 4; i++) {
-      const tLevel = getLevel('syllables', syllable + i);
-      if (tLevel !== undefined) {
-        hasStudied = true;
-        totalScore += tLevel;
-      }
-    }
-    if (hasStudied) {
-      avgLevel = Math.round(totalScore / 4);
+      const tLevel = getLevel('syllables', syllable + i) || 0;
+      toneLevels.push(tLevel);
+      if (tLevel > 0) hasAnyProgress = true;
     }
   }
+
+  // Hàm map level ra màu dot
+  const getDotColor = (lvl) => {
+    switch (lvl) {
+      case 1: return 'bg-emerald-400';
+      case 2: return 'bg-emerald-500';
+      case 3: return 'bg-pink-500';
+      case 4: return 'bg-rose-500';
+      case 0:
+      default: return 'bg-slate-200';
+    }
+  };
 
   return (
     <td 
@@ -67,12 +73,22 @@ export default function PinyinCell({ initial, final, syllable, onActivate, onClo
         onTonePlayed();
       }}
     >
-      <span className={isActive ? 'font-black' : ''}>{syllable}</span>
-      
-      {/* Icon trung bình của âm tiết */}
-      {avgLevel !== undefined && (
-        <TreeIcon level={avgLevel} className="absolute bottom-0 right-0 sm:bottom-0.5 sm:right-0.5 scale-50 opacity-80" />
-      )}
+      <div className="flex flex-col items-center justify-center h-full gap-1">
+        <span className={isActive ? 'font-black' : ''}>{syllable}</span>
+        
+        {/* 4 chấm nhỏ đại diện cho 4 thanh điệu */}
+        {hasAnyProgress && (
+          <div className="flex gap-0.5 opacity-80 mt-0.5">
+            {toneLevels.map((lvl, idx) => (
+              <div 
+                key={idx} 
+                className={`w-1.5 h-1.5 rounded-full ${getDotColor(lvl)}`}
+                title={`Thanh ${idx + 1}: Level ${lvl}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       
       {isActive && (
         <div 
