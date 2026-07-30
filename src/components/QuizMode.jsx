@@ -97,6 +97,10 @@ export default function QuizMode() {
         updateScore('spellingRules', currentQuestion.ruleId || 'general', isCorrect);
       } else if (currentQuestion.isTonePairMode) {
         updateScore('tonePairs', `${currentQuestion.originalTones[0]}-${currentQuestion.originalTones[1]}`, isCorrect);
+        // Bóc tách tính điểm thêm cho Quy tắc biến điệu nếu câu hỏi thuộc một trong 3 quy tắc
+        if (currentQuestion.ruleId) {
+          updateScore('sandhiRules', currentQuestion.ruleId, isCorrect);
+        }
       } else {
         // Cập nhật âm tiết và thanh điệu
         updateScore('syllables', `${currentQuestion.correctBase}${currentQuestion.correctTone}`, isCorrect);

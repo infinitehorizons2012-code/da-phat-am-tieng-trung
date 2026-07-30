@@ -13,22 +13,16 @@ export default function ProgressDashboard() {
     return <div className="p-8 text-center text-slate-500 font-bold">Đang tải tiến độ...</div>;
   }
 
-  // Calculate totals
-  const totalInitials = initialsData.reduce((acc, curr) => acc + curr.items.length, 0);
-  const totalFinals = finalsData.reduce((acc, curr) => acc + curr.items.length, 0);
-  const totalTones = tonesData.length;
-  
-  // Calculate how many syllables exist in Pinyin matrix
-  let totalSyllables = 0;
-  Object.keys(pinyinMatrix).forEach(initial => {
-    Object.keys(pinyinMatrix[initial]).forEach(final => {
-      if (pinyinMatrix[initial][final]) {
-        totalSyllables += 4; // 4 tones per syllable
-      }
-    });
-  });
+  // Calculate totals exactly as specified
+  const totalInitials = 21;
+  const totalFinals = 36;
+  const totalTones = 4;
+  const totalSyllables = 1600;
+  const totalTonePairs = 20;
+  const totalSpellingRules = 4;
+  const totalSandhiRules = 3;
 
-  const totalItems = totalInitials + totalFinals + totalTones + totalSyllables;
+  const totalItems = totalInitials + totalFinals + totalTones + totalSyllables + totalTonePairs + totalSpellingRules + totalSandhiRules;
 
   // Calculate current progress based on max level 3 (Level 4 is bonus/exam)
   const calculateCategoryProgress = (category, totalItemsCount) => {
@@ -50,7 +44,7 @@ export default function ProgressDashboard() {
     if (!progress) return 0;
     let currentScore = 0;
     
-    ['initials', 'finals', 'tones', 'syllables'].forEach(cat => {
+    ['initials', 'finals', 'tones', 'syllables', 'tonePairs', 'spellingRules', 'sandhiRules'].forEach(cat => {
       if (progress[cat]) {
         Object.keys(progress[cat]).forEach(key => {
           currentScore += Math.min(3, progress[cat][key]);
@@ -60,13 +54,20 @@ export default function ProgressDashboard() {
     
     const maxScore = totalItems * 3;
     if (maxScore === 0) return 0;
-    return Math.round((currentScore / maxScore) * 100);
+    
+    // Format to 2 decimal places if > 0 and < 1 to show micro progress
+    const pct = (currentScore / maxScore) * 100;
+    if (pct > 0 && pct < 1) return pct.toFixed(2);
+    return Math.round(pct);
   };
 
   const initialProgress = calculateCategoryProgress('initials', totalInitials);
   const finalProgress = calculateCategoryProgress('finals', totalFinals);
   const toneProgress = calculateCategoryProgress('tones', totalTones);
   const syllableProgress = calculateCategoryProgress('syllables', totalSyllables);
+  const tonePairProgress = calculateCategoryProgress('tonePairs', totalTonePairs);
+  const spellingProgress = calculateCategoryProgress('spellingRules', totalSpellingRules);
+  const sandhiProgress = calculateCategoryProgress('sandhiRules', totalSandhiRules);
   const overallProgress = calculateOverallProgress();
 
   const getTreeCountByLevel = (level) => {
@@ -102,11 +103,14 @@ export default function ProgressDashboard() {
       <div className="p-6 overflow-y-auto hide-scrollbar flex-1 bg-slate-50/50">
         
         {/* Progress Bars */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <ProgressCard title="Thanh mẫu" percentage={initialProgress} color="bg-rose-500" icon="🔤" />
           <ProgressCard title="Vận mẫu" percentage={finalProgress} color="bg-blue-500" icon="🅰️" />
           <ProgressCard title="Thanh điệu" percentage={toneProgress} color="bg-amber-500" icon="🎵" />
           <ProgressCard title="Ghép vần (Syllables)" percentage={syllableProgress} color="bg-purple-500" icon="🧩" />
+          <ProgressCard title="Quy tắc chính tả" percentage={spellingProgress} color="bg-teal-500" icon="📝" />
+          <ProgressCard title="Quy tắc biến điệu" percentage={sandhiProgress} color="bg-orange-500" icon="⚡" />
+          <ProgressCard title="Ma trận âm điệu" percentage={tonePairProgress} color="bg-indigo-500" icon="📊" />
         </div>
 
         {/* Garden Stats */}

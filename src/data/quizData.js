@@ -187,24 +187,24 @@ export const generateToneQuizRound = (numQuestions = 10) => {
 // Dữ liệu các từ ghép (đặc biệt chú trọng biến điệu)
 const tonePairWords = [
   // 3+3 -> 2+3
-  { word: ['ni', 'hao'], tones: [3, 3], sandhiTones: [2, 3] },
-  { word: ['ke', 'yi'], tones: [3, 3], sandhiTones: [2, 3] },
-  { word: ['lao', 'ban'], tones: [3, 3], sandhiTones: [2, 3] },
-  { word: ['shou', 'biao'], tones: [3, 3], sandhiTones: [2, 3] },
-  { word: ['yu', 'san'], tones: [3, 3], sandhiTones: [2, 3] },
+  { word: ['ni', 'hao'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
+  { word: ['ke', 'yi'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
+  { word: ['lao', 'ban'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
+  { word: ['shou', 'biao'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
+  { word: ['yu', 'san'], tones: [3, 3], sandhiTones: [2, 3], ruleId: '3+3' },
   
   // Biến điệu của "yi"
-  { word: ['yi', 'ge'], tones: [1, 4], sandhiTones: [2, 4] },
-  { word: ['yi', 'tian'], tones: [1, 1], sandhiTones: [4, 1] },
-  { word: ['yi', 'nian'], tones: [1, 2], sandhiTones: [4, 2] },
-  { word: ['yi', 'qi'], tones: [1, 3], sandhiTones: [4, 3] },
-  { word: ['yi', 'kuai'], tones: [1, 4], sandhiTones: [2, 4] },
+  { word: ['yi', 'ge'], tones: [1, 4], sandhiTones: [2, 4], ruleId: 'yi' },
+  { word: ['yi', 'tian'], tones: [1, 1], sandhiTones: [4, 1], ruleId: 'yi' },
+  { word: ['yi', 'nian'], tones: [1, 2], sandhiTones: [4, 2], ruleId: 'yi' },
+  { word: ['yi', 'qi'], tones: [1, 3], sandhiTones: [4, 3], ruleId: 'yi' },
+  { word: ['yi', 'kuai'], tones: [1, 4], sandhiTones: [2, 4], ruleId: 'yi' },
   
   // Biến điệu của "bu"
-  { word: ['bu', 'shi'], tones: [4, 4], sandhiTones: [2, 4] },
-  { word: ['bu', 'dui'], tones: [4, 4], sandhiTones: [2, 4] },
-  { word: ['bu', 'hao'], tones: [4, 3], sandhiTones: [4, 3] },
-  { word: ['bu', 'mang'], tones: [4, 2], sandhiTones: [4, 2] },
+  { word: ['bu', 'shi'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' },
+  { word: ['bu', 'dui'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' },
+  { word: ['bu', 'hao'], tones: [4, 3], sandhiTones: [4, 3], ruleId: 'bu' },
+  { word: ['bu', 'mang'], tones: [4, 2], sandhiTones: [4, 2], ruleId: 'bu' },
   
   // Các cặp không có biến điệu phổ biến
   { word: ['zhong', 'guo'], tones: [1, 2], sandhiTones: [1, 2] },
@@ -257,6 +257,7 @@ export const generateTonePairQuizRound = (numQuestions = 10) => {
       correctWord: correctWord.word, // mảng 2 chữ pinyin base
       originalTones: originalTones,  // mảng 2 số (gốc) dùng cho giải thích
       correctTones: pronouncedTones, // mảng 2 số (biến điệu) dùng làm đáp án đúng
+      ruleId: correctWord.ruleId,
       options: shuffledOptions,
       isTonePairMode: true
     });
@@ -268,36 +269,36 @@ export const generateTonePairQuizRound = (numQuestions = 10) => {
 // Dữ liệu cho bài kiểm tra Quy tắc chính tả (Spelling Rules)
 const spellingRulesData = [
   // Luật U (ü)
-  { formula: 'j + ü', correct: 'ju', wrong: ['jü', 'jyu', 'jou'], explanation: 'j, q, x đi với ü phải bỏ hai chấm.' },
-  { formula: 'q + üe', correct: 'que', wrong: ['qüe', 'qyue', 'qie'], explanation: 'j, q, x đi với ü phải bỏ hai chấm.' },
-  { formula: 'x + üan', correct: 'xuan', wrong: ['xüan', 'xyuan', 'xian'], explanation: 'j, q, x đi với ü phải bỏ hai chấm.' },
-  { formula: 'j + ün', correct: 'jun', wrong: ['jün', 'jyun', 'jin'], explanation: 'j, q, x đi với ü phải bỏ hai chấm.' },
+  { ruleId: 'Luật j,q,x + ü', formula: 'j + ü', correct: 'ju', wrong: ['jü', 'jyu', 'jou'], explanation: 'j, q, x đi với ü phải bỏ hai chấm.' },
+  { ruleId: 'Luật j,q,x + ü', formula: 'q + üe', correct: 'que', wrong: ['qüe', 'qyue', 'qie'], explanation: 'j, q, x đi với ü phải bỏ hai chấm.' },
+  { ruleId: 'Luật j,q,x + ü', formula: 'x + üan', correct: 'xuan', wrong: ['xüan', 'xyuan', 'xian'], explanation: 'j, q, x đi với ü phải bỏ hai chấm.' },
+  { ruleId: 'Luật j,q,x + ü', formula: 'j + ün', correct: 'jun', wrong: ['jün', 'jyun', 'jin'], explanation: 'j, q, x đi với ü phải bỏ hai chấm.' },
   
   // Bẫy Luật U (n, l)
-  { formula: 'n + ü', correct: 'nü', wrong: ['nu', 'nyu', 'nv'], explanation: 'n và l đi với ü VẪN PHẢI GIỮ nguyên hai chấm để phân biệt với nu, lu.' },
-  { formula: 'l + üe', correct: 'lüe', wrong: ['lue', 'lyue', 'lve'], explanation: 'n và l đi với ü VẪN PHẢI GIỮ nguyên hai chấm.' },
+  { ruleId: 'Luật n,l + ü', formula: 'n + ü', correct: 'nü', wrong: ['nu', 'nyu', 'nv'], explanation: 'n và l đi với ü VẪN PHẢI GIỮ nguyên hai chấm để phân biệt với nu, lu.' },
+  { ruleId: 'Luật n,l + ü', formula: 'l + üe', correct: 'lüe', wrong: ['lue', 'lyue', 'lve'], explanation: 'n và l đi với ü VẪN PHẢI GIỮ nguyên hai chấm.' },
 
   // Luật Y (i)
-  { formula: '∅ + i', correct: 'yi', wrong: ['i', 'y', 'yii'], explanation: 'Âm tiết bắt đầu bằng i phải thêm y phía trước (thành yi).' },
-  { formula: '∅ + ia', correct: 'ya', wrong: ['ia', 'yia', 'iya'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
-  { formula: '∅ + ie', correct: 'ye', wrong: ['ie', 'yie', 'iye'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
-  { formula: '∅ + iao', correct: 'yao', wrong: ['iao', 'yiao', 'iyao'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
-  { formula: '∅ + iou', correct: 'you', wrong: ['iou', 'yiou', 'iyou'], explanation: 'Âm tiết iou khi đứng một mình viết thành you.' },
-  { formula: '∅ + ian', correct: 'yan', wrong: ['ian', 'yian', 'iyan'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
-  { formula: '∅ + in', correct: 'yin', wrong: ['in', 'yn', 'yiin'], explanation: 'Âm tiết bắt đầu bằng in phải thêm y phía trước (thành yin).' },
-  { formula: '∅ + iang', correct: 'yang', wrong: ['iang', 'yiang', 'iyang'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
-  { formula: '∅ + ing', correct: 'ying', wrong: ['ing', 'yng', 'yiing'], explanation: 'Âm tiết bắt đầu bằng ing phải thêm y phía trước (thành ying).' },
-  { formula: '∅ + iong', correct: 'yong', wrong: ['iong', 'yiong', 'iyong'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + i', correct: 'yi', wrong: ['i', 'y', 'yii'], explanation: 'Âm tiết bắt đầu bằng i phải thêm y phía trước (thành yi).' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + ia', correct: 'ya', wrong: ['ia', 'yia', 'iya'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + ie', correct: 'ye', wrong: ['ie', 'yie', 'iye'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + iao', correct: 'yao', wrong: ['iao', 'yiao', 'iyao'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + iou', correct: 'you', wrong: ['iou', 'yiou', 'iyou'], explanation: 'Âm tiết iou khi đứng một mình viết thành you.' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + ian', correct: 'yan', wrong: ['ian', 'yian', 'iyan'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + in', correct: 'yin', wrong: ['in', 'yn', 'yiin'], explanation: 'Âm tiết bắt đầu bằng in phải thêm y phía trước (thành yin).' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + iang', correct: 'yang', wrong: ['iang', 'yiang', 'iyang'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + ing', correct: 'ying', wrong: ['ing', 'yng', 'yiing'], explanation: 'Âm tiết bắt đầu bằng ing phải thêm y phía trước (thành ying).' },
+  { ruleId: 'Luật i đứng đầu', formula: '∅ + iong', correct: 'yong', wrong: ['iong', 'yiong', 'iyong'], explanation: 'Âm tiết bắt đầu bằng i (có nguyên âm khác theo sau) thì i biến thành y.' },
 
   // Luật W (u)
-  { formula: '∅ + u', correct: 'wu', wrong: ['u', 'w', 'uu'], explanation: 'Âm tiết bắt đầu bằng u phải thêm w phía trước (thành wu).' },
-  { formula: '∅ + ua', correct: 'wa', wrong: ['ua', 'wua', 'uwa'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' },
-  { formula: '∅ + uo', correct: 'wo', wrong: ['uo', 'wuo', 'uwo'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' },
-  { formula: '∅ + uai', correct: 'wai', wrong: ['uai', 'wuai', 'uwai'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' },
-  { formula: '∅ + uei', correct: 'wei', wrong: ['uei', 'wuei', 'uwei'], explanation: 'Âm tiết uei khi đứng một mình viết thành wei.' },
-  { formula: '∅ + uan', correct: 'wan', wrong: ['uan', 'wuan', 'uwan'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' },
-  { formula: '∅ + uen', correct: 'wen', wrong: ['uen', 'wuen', 'uwen'], explanation: 'Âm tiết uen khi đứng một mình viết thành wen.' },
-  { formula: '∅ + uang', correct: 'wang', wrong: ['uang', 'wuang', 'uwang'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' }
+  { ruleId: 'Luật u đứng đầu', formula: '∅ + u', correct: 'wu', wrong: ['u', 'w', 'uu'], explanation: 'Âm tiết bắt đầu bằng u phải thêm w phía trước (thành wu).' },
+  { ruleId: 'Luật u đứng đầu', formula: '∅ + ua', correct: 'wa', wrong: ['ua', 'wua', 'uwa'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' },
+  { ruleId: 'Luật u đứng đầu', formula: '∅ + uo', correct: 'wo', wrong: ['uo', 'wuo', 'uwo'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' },
+  { ruleId: 'Luật u đứng đầu', formula: '∅ + uai', correct: 'wai', wrong: ['uai', 'wuai', 'uwai'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' },
+  { ruleId: 'Luật u đứng đầu', formula: '∅ + uei', correct: 'wei', wrong: ['uei', 'wuei', 'uwei'], explanation: 'Âm tiết uei khi đứng một mình viết thành wei.' },
+  { ruleId: 'Luật u đứng đầu', formula: '∅ + uan', correct: 'wan', wrong: ['uan', 'wuan', 'uwan'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' },
+  { ruleId: 'Luật u đứng đầu', formula: '∅ + uen', correct: 'wen', wrong: ['uen', 'wuen', 'uwen'], explanation: 'Âm tiết uen khi đứng một mình viết thành wen.' },
+  { ruleId: 'Luật u đứng đầu', formula: '∅ + uang', correct: 'wang', wrong: ['uang', 'wuang', 'uwang'], explanation: 'Âm tiết bắt đầu bằng u (có nguyên âm khác theo sau) thì u biến thành w.' }
 ];
 
 // Hàm tạo 10 câu hỏi Trắc nghiệm Chính tả
@@ -326,6 +327,7 @@ export const generateSpellingQuizRound = (numQuestions = 10) => {
     questions.push({
       id: index + 1,
       isSpellingMode: true,
+      ruleId: rule.ruleId,
       formula: rule.formula,
       correctAnswer: rule.correct,
       explanation: rule.explanation,
