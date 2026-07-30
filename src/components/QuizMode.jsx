@@ -14,7 +14,7 @@ export default function QuizMode() {
   const [isFinished, setIsFinished] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const { updateScore } = useProgress();
+  const { updateScore, progress } = useProgress();
 
   // Khởi tạo vòng mới
   const startNewRound = (newMode = mode) => {
@@ -23,7 +23,7 @@ export default function QuizMode() {
     } else if (newMode === 'tone') {
       setQuestions(generateToneQuizRound(10));
     } else if (newMode === 'tonepair') {
-      setQuestions(generateTonePairQuizRound(10));
+      setQuestions(generateTonePairQuizRound(10, progress));
     } else if (newMode === 'spelling') {
       setQuestions(generateSpellingQuizRound(10));
     } else {

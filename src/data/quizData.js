@@ -337,12 +337,36 @@ const tonePairWords = [
   { word: ['bu', 'qu'], tones: [4, 4], sandhiTones: [2, 4], ruleId: 'bu' }
 ];
 
-// Hàm tạo 10 câu hỏi để nghe cặp thanh điệu
-export const generateTonePairQuizRound = (numQuestions = 10) => {
+// Hàm tạo 10 câu hỏi để nghe cặp thanh điệu (Có áp dụng Spaced Repetition)
+export const generateTonePairQuizRound = (numQuestions = 10, progress = null) => {
   const questions = [];
   
-  // Shuffle tonePairWords and pick the first numQuestions elements to guarantee unique words
-  const shuffledWords = [...tonePairWords].sort(() => Math.random() - 0.5);
+  // Trọng số theo cấp độ (Ưu tiên từ chưa học hoặc cấp thấp)
+  const getWeight = (level) => {
+    switch (level) {
+      case 0: return 10; // Chưa nảy mầm -> Xuất hiện nhiều nhất
+      case 1: return 7;  // Mầm non
+      case 2: return 4;  // Cây nhỏ
+      case 3: return 1;  // Đã nở hoa -> Xuất hiện ít nhất
+      case 4: return 1;  // Đã có quả
+      default: return 10;
+    }
+  };
+  
+  // Shuffle tonePairWords theo trọng số (Weighted Random Shuffle)
+  const shuffledWords = [...tonePairWords].sort((a, b) => {
+    const pairKeyA = `${a.tones[0]}-${a.tones[1]}`;
+    const pairKeyB = `${b.tones[0]}-${b.tones[1]}`;
+    
+    const levelA = progress?.tonePairs?.[pairKeyA] || 0;
+    const levelB = progress?.tonePairs?.[pairKeyB] || 0;
+    
+    const scoreA = Math.random() * getWeight(levelA);
+    const scoreB = Math.random() * getWeight(levelB);
+    
+    return scoreB - scoreA; // Giảm dần theo điểm ưu tiên
+  });
+  
   const selectedWords = shuffledWords.slice(0, numQuestions);
   
   for (let i = 0; i < selectedWords.length; i++) {
