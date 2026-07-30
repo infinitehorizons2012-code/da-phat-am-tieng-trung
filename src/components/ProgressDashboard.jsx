@@ -280,23 +280,58 @@ export default function ProgressDashboard() {
               </div>
               
               <div className="p-6 overflow-y-auto flex-1">
-                {items.length === 0 ? (
+                {items.length === 0 && selectedCategory.key !== 'initials' && selectedCategory.key !== 'finals' ? (
                   <div className="text-center text-slate-400 font-medium py-8">
                     Chưa học mục nào trong phần này.
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-3">
-                    {items.map(i => (
-                      <div key={i.item} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
-                        <span className="font-bold text-slate-700">
-                          {i.item === 'general' ? 'Tổng quát' : i.item}
-                        </span>
-                        <div className="scale-75 origin-left">
-                          <TreeIcon level={i.level} />
-                        </div>
+                  (selectedCategory.key === 'initials' || selectedCategory.key === 'finals') ? (() => {
+                    const groupData = selectedCategory.key === 'initials' ? initialsData : finalsData;
+                    return (
+                      <div className="space-y-6">
+                        {groupData.map(group => {
+                          const groupItems = items.filter(i => group.items.includes(i.item));
+                          const groupMaxScore = group.items.length * 3;
+                          const groupCurrentScore = groupItems.reduce((acc, curr) => acc + Math.min(3, curr.level), 0);
+                          return (
+                            <div key={group.title}>
+                              <div className="flex justify-between items-end mb-2 border-b border-slate-100 pb-1">
+                                <h4 className="text-sm font-black text-slate-600 uppercase tracking-wider">{group.title}</h4>
+                                <div className="text-xs font-bold text-slate-400">
+                                  {groupItems.length}/{group.items.length} mục • {groupCurrentScore}/{groupMaxScore} đ
+                                </div>
+                              </div>
+                              {groupItems.length > 0 ? (
+                                <div className="flex flex-wrap gap-3 mt-3">
+                                  {groupItems.map(i => (
+                                    <div key={i.item} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
+                                      <span className="font-bold text-slate-700">{i.item}</span>
+                                      <div className="scale-75 origin-left"><TreeIcon level={i.level} /></div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-sm text-slate-300 italic mt-2">Chưa học mục nào trong nhóm này.</div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })() : (
+                    <div className="flex flex-wrap gap-3">
+                      {items.map(i => (
+                        <div key={i.item} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
+                          <span className="font-bold text-slate-700">
+                            {i.item === 'general' ? 'Tổng quát' : i.item}
+                          </span>
+                          <div className="scale-75 origin-left">
+                            <TreeIcon level={i.level} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
                 )}
               </div>
             </div>

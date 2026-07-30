@@ -2,36 +2,42 @@ export const initialsData = [
   {
     title: 'ÂM MÔI',
     chinese: '双唇音 / 唇齿音',
+    desc: '4 PHỤ ÂM',
     color: 'rose', // Đỏ
     items: ['b', 'p', 'm', 'f']
   },
   {
     title: 'ÂM ĐẦU LƯỠI',
     chinese: '舌尖中音',
+    desc: '4 PHỤ ÂM',
     color: 'blue', // Xanh dương
     items: ['d', 't', 'n', 'l']
   },
   {
     title: 'ÂM CUỐNG LƯỠI',
     chinese: '舌根音',
+    desc: '3 PHỤ ÂM',
     color: 'emerald', // Xanh lá
     items: ['g', 'k', 'h']
   },
   {
     title: 'ÂM MẶT LƯỠI',
     chinese: '舌面音',
+    desc: '3 PHỤ ÂM',
     color: 'purple', // Tím
     items: ['j', 'q', 'x']
   },
   {
     title: 'ÂM UỐN LƯỠI',
     chinese: '舌尖后音 — RETROFLEX',
+    desc: '4 PHỤ ÂM',
     color: 'amber', // Vàng
     items: ['zh', 'ch', 'sh', 'r']
   },
   {
     title: 'ÂM ĐẦU LƯỠI PHẲNG',
     chinese: '舌尖前音',
+    desc: '3 PHỤ ÂM',
     color: 'blue', 
     items: ['z', 'c', 's']
   }
@@ -41,35 +47,35 @@ export const finalsData = [
   {
     title: 'ĐƠN VẬN MẪU',
     chinese: '单韵母',
-    desc: '6 vần đơn',
+    desc: '6 VẦN ĐƠN',
     color: 'rose',
     items: ['a', 'o', 'e', 'i', 'u', 'ü']
   },
   {
     title: 'PHỨC VẬN MẪU',
     chinese: '复韵母',
-    desc: 'vần kép',
+    desc: '13 VẦN KÉP',
     color: 'blue',
     items: ['ai', 'ei', 'ao', 'ou', 'ia', 'ie', 'ua', 'uo', 'üe', 'iao', 'iou', 'uai', 'uei']
   },
   {
     title: 'TIỀN TỴ VẬN MẪU',
     chinese: '前鼻韵母 -N',
-    desc: 'vần mũi trước',
+    desc: '8 VẦN MŨI TRƯỚC',
     color: 'emerald',
     items: ['an', 'en', 'in', 'un', 'ün', 'ian', 'uan', 'üan']
   },
   {
     title: 'HẬU TỴ VẬN MẪU',
     chinese: '后鼻韵母 -NG',
-    desc: 'vần mũi sau',
+    desc: '8 VẦN MŨI SAU',
     color: 'amber',
     items: ['ang', 'eng', 'ing', 'ong', 'iang', 'uang', 'iong', 'ueng']
   },
   {
     title: 'ĐẶC BIỆT',
-    chinese: '',
-    desc: '',
+    chinese: '特殊韵母',
+    desc: '2 VẦN ĐẶC BIỆT',
     color: 'purple',
     items: ['er', 'ê']
   }

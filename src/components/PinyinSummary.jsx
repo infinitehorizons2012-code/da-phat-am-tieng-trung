@@ -69,7 +69,8 @@ export default function PinyinSummary() {
               {initialsData.map((group, idx) => (
                 <div key={idx}>
                   <div className="text-sm font-bold text-rose-900 uppercase mb-3 flex items-center gap-2 tracking-wide">
-                    {group.title} <span className="text-xs font-normal">({group.chinese})</span>
+                    {group.title} {group.chinese && <span className="text-xs font-normal">({group.chinese})</span>} 
+                    {group.desc && <span className="text-xs font-normal">— {group.desc}</span>}
                   </div>
                   <div className="flex flex-wrap gap-3">
                     {group.items.map((item, i) => {
