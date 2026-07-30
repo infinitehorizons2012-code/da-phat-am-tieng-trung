@@ -177,6 +177,14 @@ export default function ProgressDashboard() {
         >
           🍎 Thi Cuối Kỳ
         </button>
+        <button
+          className={`flex-1 py-4 text-center font-bold text-sm sm:text-base transition-colors flex items-center justify-center gap-2 ${
+            activeTab === 'rules' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+          }`}
+          onClick={() => setActiveTab('rules')}
+        >
+          📖 Luật Chơi
+        </button>
       </div>
 
       <div className="p-6 overflow-y-auto hide-scrollbar flex-1 bg-slate-50/50">
@@ -248,6 +256,42 @@ export default function ProgressDashboard() {
                     </div>
                   )}
                </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'rules' && (
+          <div className="animate-in fade-in duration-300">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+              <h3 className="text-2xl font-black text-blue-700 mb-6 flex items-center gap-3">
+                <span className="text-3xl">📖</span> Hướng Dẫn Luật Chơi & Trắc Nghiệm
+              </h3>
+              
+              <div className="space-y-6 text-slate-600 leading-relaxed">
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 shrink-0 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl font-bold">1</div>
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-800 mb-1">Gieo Hạt & Chăm Cây</h4>
+                    <p>Mỗi một kiến thức bé học (thanh mẫu, vận mẫu, quy tắc...) tương ứng với một hạt giống trong khu vườn. Khi bé trả lời đúng 3 lần liên tiếp trong phần Trắc Nghiệm, hạt giống sẽ được nâng lên 1 cấp (Hạt giống ➞ Mầm non ➞ Cây trưởng thành ➞ Nở hoa).</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 shrink-0 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl font-bold">2</div>
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-800 mb-1">Thuật Toán Trắc Nghiệm Thông Minh (Spaced Repetition)</h4>
+                    <p>Hệ thống trắc nghiệm không ra câu hỏi ngẫu nhiên mà <strong>ưu tiên hỏi những từ bé chưa thuộc</strong> (cây ở cấp độ thấp) và <strong>rất ít hỏi lại những từ đã nở hoa</strong>. Thuật toán lặp lại ngắt quãng này giúp bé tập trung thời gian vào những kiến thức còn yếu, tối ưu hóa quá trình học.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 shrink-0 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xl font-bold">3</div>
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-800 mb-1">Kỳ Thi Cuối Kỳ & Thu Hoạch Quả</h4>
+                    <p>Khi <strong>toàn bộ khu vườn đều nở hoa (Tiến độ 100%)</strong>, bé sẽ được mở khóa Kỳ Thi Cuối Kỳ. Bài thi sẽ kiểm tra tổng hợp toàn bộ kiến thức trong vòng 20 phút. Nếu bé đạt từ 70% trở lên, các cây sẽ ra <strong>Quả Táo Đỏ (Cấp 5)</strong>. Tuy nhiên, nếu bé trả lời sai câu nào, cây đó sẽ bị <strong>tụt điểm về Mầm non (Cấp 2)</strong> và bé sẽ phải ôn lại để được thi tiếp!</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
