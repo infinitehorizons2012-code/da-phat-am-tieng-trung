@@ -35,6 +35,31 @@ export const applyTone = (syllable, tone) => {
 // Global audio object để có thể dừng khi đang phát dở
 let currentAudio = null;
 
+const toneMarksReverse = {
+  'ā': { char: 'a', tone: 1 }, 'á': { char: 'a', tone: 2 }, 'ǎ': { char: 'a', tone: 3 }, 'à': { char: 'a', tone: 4 },
+  'ē': { char: 'e', tone: 1 }, 'é': { char: 'e', tone: 2 }, 'ě': { char: 'e', tone: 3 }, 'è': { char: 'e', tone: 4 },
+  'ī': { char: 'i', tone: 1 }, 'í': { char: 'i', tone: 2 }, 'ǐ': { char: 'i', tone: 3 }, 'ì': { char: 'i', tone: 4 },
+  'ō': { char: 'o', tone: 1 }, 'ó': { char: 'o', tone: 2 }, 'ǒ': { char: 'o', tone: 3 }, 'ò': { char: 'o', tone: 4 },
+  'ū': { char: 'u', tone: 1 }, 'ú': { char: 'u', tone: 2 }, 'ǔ': { char: 'u', tone: 3 }, 'ù': { char: 'u', tone: 4 },
+  'ǖ': { char: 'v', tone: 1 }, 'ǘ': { char: 'v', tone: 2 }, 'ǚ': { char: 'v', tone: 3 }, 'ǜ': { char: 'v', tone: 4 },
+  'ü': { char: 'v', tone: 1 } // neutral/default cho ü
+};
+
+export const pinyinToNumber = (pinyin) => {
+  let tone = 5; // Mặc định là thanh 5 (khinh thanh) nếu không có dấu
+  let basePinyin = '';
+  for (let i = 0; i < pinyin.length; i++) {
+    const char = pinyin[i];
+    if (toneMarksReverse[char]) {
+      basePinyin += toneMarksReverse[char].char;
+      tone = toneMarksReverse[char].tone;
+    } else {
+      basePinyin += char;
+    }
+  }
+  return basePinyin + tone;
+};
+
 export const playPinyinAudio = (text, onEnd, onStatus) => {
   stopAudio();
   
@@ -43,14 +68,22 @@ export const playPinyinAudio = (text, onEnd, onStatus) => {
   let isNeutral = false;
   if (fileName.endsWith('5')) {
     isNeutral = true;
+    // Fallback to tone 1 audio file for neutral tone
     fileName = fileName.slice(0, -1) + '1'; 
   }
 
-  if (fileName.startsWith('nve')) fileName = fileName.replace('nve', 'n%C3%BCe');
-  else if (fileName.startsWith('lve')) fileName = fileName.replace('lve', 'l%C3%BCe');
-  else if (fileName.startsWith('nv')) fileName = fileName.replace('nv', 'nu');
-  else if (fileName.startsWith('lv')) fileName = fileName.replace('lv', 'lu');
+  // Handle specific filename mismatches with Cloudinary
+  if (fileName.startsWith('nve')) {
+    fileName = fileName.replace('nve', 'n%C3%BCe');
+  } else if (fileName.startsWith('lve')) {
+    fileName = fileName.replace('lve', 'l%C3%BCe');
+  } else if (fileName.startsWith('nv')) {
+    fileName = fileName.replace('nv', 'nu');
+  } else if (fileName.startsWith('lv')) {
+    fileName = fileName.replace('lv', 'lu');
+  }
   
+  // Sử dụng nguồn Cloudinary cá nhân để đảm bảo đầy đủ âm tiết và ổn định
   const cdnList = [
     { name: 'Cloudinary', url: `https://res.cloudinary.com/zopjocdi/video/upload/da-phat-am-tieng-trung/audio/${fileName}.mp3` }
   ];
@@ -70,22 +103,21 @@ export const playPinyinAudio = (text, onEnd, onStatus) => {
     const audio = new Audio(url);
     
     if (isNeutral) {
-      audio.playbackRate = 1.3;
-      audio.volume = 0.6;
+      audio.playbackRate = 1.3; // Ngắn và nhanh hơn
+      audio.volume = 0.6; // Nhẹ hơn
     }
     
-    // Gán ngay để hàm stopAudio() có thể dừng
+    // Gán ngay để hàm stopAudio() có thể dừng nếu user bấm nhanh ô khác
     currentAudio = audio;
     
-    audio.onended = () => {
-      audio.onended = null;
+    audio.addEventListener('ended', () => {
       if (onEnd) onEnd();
-    };
+    });
     
-    audio.onerror = () => {
+    audio.addEventListener('error', () => {
       currentTry++;
       tryNext(); // Nếu file lỗi (404) hoặc mạng chặn, thử link tiếp theo
-    };
+    });
     
     audio.play().catch(error => {
       // Nếu bị chặn autoplay hoặc đứt mạng
@@ -109,8 +141,11 @@ export const playAudioSequence = (syllablesData, onProgress, onComplete) => {
     }
     
     const data = syllablesData[currentIndex];
+    // data có dạng { cellId, text: 'ma' }
+    
     if (onProgress) onProgress(currentIndex, data);
     
+    // Mặc định Auto Play đọc thanh 1
     playPinyinAudio(data.text, () => {
       currentIndex++;
       setTimeout(playNext, 400); 
@@ -123,9 +158,6 @@ export const playAudioSequence = (syllablesData, onProgress, onComplete) => {
 export const stopAudio = () => {
   if (currentAudio) {
     currentAudio.pause();
-    currentAudio.onended = null;
-    currentAudio.onerror = null;
-    currentAudio.ontimeupdate = null;
     currentAudio.currentTime = 0;
     currentAudio = null;
   }
@@ -184,44 +216,6 @@ export const applyToneSandhi = (tokens) => {
 export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus) => {
   stopAudio();
   
-  if (!tokens || tokens.length === 0) {
-    if (onComplete) onComplete();
-    return;
-  }
-  
-  // 1. Tạo và Unlock toàn bộ Audio Elements trong cùng 1 Call Stack (của Click Event)
-  // Điều này giúp bypass cơ chế chặn Autoplay của Safari/iOS đối với các âm thanh phát nối tiếp nhau.
-  const sequenceAudios = tokens.map(token => {
-    const textToRead = applyTone(token.base, token.displayTone);
-    let fileName = pinyinToNumber(textToRead);
-    
-    let isNeutral = false;
-    if (fileName.endsWith('5')) {
-      isNeutral = true;
-      fileName = fileName.slice(0, -1) + '1'; 
-    }
-
-    if (fileName.startsWith('nve')) fileName = fileName.replace('nve', 'n%C3%BCe');
-    else if (fileName.startsWith('lve')) fileName = fileName.replace('lve', 'l%C3%BCe');
-    else if (fileName.startsWith('nv')) fileName = fileName.replace('nv', 'nu');
-    else if (fileName.startsWith('lv')) fileName = fileName.replace('lv', 'lu');
-    
-    const url = `https://res.cloudinary.com/zopjocdi/video/upload/da-phat-am-tieng-trung/audio/${fileName}.mp3`;
-    
-    const audio = new Audio(url);
-    if (isNeutral) {
-      audio.playbackRate = 1.3;
-      audio.volume = 0.6;
-    } else {
-      audio.playbackRate = 1.25;
-    }
-    
-    // Unlock iOS Safari
-    audio.load();
-    
-    return { audio, text: textToRead };
-  });
-  
   let currentIndex = 0;
   
   const playNext = () => {
@@ -232,48 +226,19 @@ export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus)
     
     const token = tokens[currentIndex];
     if (onProgress) onProgress(currentIndex, token);
-    if (onStatus) onStatus(`Đang đọc: ${sequenceAudios[currentIndex].text}`);
     
-    // Sử dụng audio đã được pre-load và unlock
-    currentAudio = sequenceAudios[currentIndex].audio;
+    const textToRead = applyTone(token.base, token.displayTone);
     
-    const handleEnd = () => {
-      if (currentAudio) {
-        currentAudio.ontimeupdate = null;
-        currentAudio.onended = null;
-        currentAudio.onerror = null;
-      }
+    // Sử dụng cơ chế playlist mặc định (onended) để tương thích 100% với Safari/iOS
+    playPinyinAudio(textToRead, () => {
       currentIndex++;
       playNext();
-    };
+    }, onStatus);
     
-    currentAudio.onended = handleEnd;
-    
-    currentAudio.onerror = () => {
-      console.warn(`Lỗi khi phát audio ${sequenceAudios[currentIndex].text}`);
-      handleEnd(); // Bỏ qua và phát tiếp
-    };
-    
-    // Hack: Tăng tốc độ phát của audio hiện tại để nghe mượt và liền mạch hơn
-    if (currentIndex < tokens.length - 1) {
-      currentAudio.ontimeupdate = function() {
-        const duration = this.duration || 0.8;
-        const cutTime = Math.max(0.1, duration - 0.2);
-        if (this.currentTime >= cutTime) {
-          this.ontimeupdate = null;
-          this.onended = null;
-          currentIndex++;
-          playNext();
-        }
-      };
-    } else {
-      currentAudio.ontimeupdate = null;
+    // Hack: Chỉ tăng tốc độ phát để nghe mượt hơn, không dùng timeupdate cắt sớm vì iOS chặn play() từ timeupdate
+    if (currentAudio) {
+      currentAudio.playbackRate = 1.25; 
     }
-    
-    currentAudio.play().catch(error => {
-      console.warn("Autoplay blocked or network error", error);
-      handleEnd();
-    });
   };
   
   playNext();
