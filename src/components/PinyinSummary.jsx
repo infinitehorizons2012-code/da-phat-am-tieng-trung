@@ -196,7 +196,10 @@ export default function PinyinSummary() {
             <div className="flex flex-col gap-6 ml-4 max-w-4xl">
               
               {/* Rule 1 */}
-              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 sm:p-6 shadow-sm relative">
+                <div className="absolute top-6 right-6">
+                  <TreeIcon level={getLevel('spellingRules', 'Luật j,q,x + ü')} className="scale-125 origin-top-right" />
+                </div>
                 <h3 className="text-xl font-black text-rose-800 mb-3 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center text-sm">1</span>
                   Luật ẩn hai chấm của "ü"
@@ -214,7 +217,10 @@ export default function PinyinSummary() {
               </div>
 
               {/* Rule 2 */}
-              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 sm:p-6 shadow-sm relative">
+                <div className="absolute top-6 right-6">
+                  <TreeIcon level={getLevel('spellingRules', 'Luật i đứng đầu')} className="scale-125 origin-top-right" />
+                </div>
                 <h3 className="text-xl font-black text-blue-800 mb-3 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm">2</span>
                   Luật thêm/biến đổi "y" (Khi bắt đầu bằng i)
@@ -229,7 +235,10 @@ export default function PinyinSummary() {
               </div>
 
               {/* Rule 3 */}
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 sm:p-6 shadow-sm relative">
+                <div className="absolute top-6 right-6">
+                  <TreeIcon level={getLevel('spellingRules', 'Luật u đứng đầu')} className="scale-125 origin-top-right" />
+                </div>
                 <h3 className="text-xl font-black text-emerald-800 mb-3 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm">3</span>
                   Luật thêm/biến đổi "w" (Khi bắt đầu bằng u)

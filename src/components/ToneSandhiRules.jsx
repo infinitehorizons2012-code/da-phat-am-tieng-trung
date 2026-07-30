@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Volume2 } from 'lucide-react';
 import { playContinuousSequence, stopAudio } from '../utils/pinyinUtils';
+import { useProgress } from '../context/ProgressContext';
+import TreeIcon from './TreeIcon';
 
 export default function ToneSandhiRules() {
   const [activeBtn, setActiveBtn] = useState(null);
+  const { getLevel } = useProgress();
   
   const handlePlay = (id, tokens) => {
     if (activeBtn === id) {
@@ -34,7 +37,10 @@ export default function ToneSandhiRules() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 min-h-0 overflow-y-auto pb-8 hide-scrollbar px-2">
         
         {/* CARD 1: 3 + 3 */}
-        <div className="bg-white rounded-3xl border border-rose-100 shadow-sm p-6 flex flex-col h-fit">
+        <div className="bg-white rounded-3xl border border-rose-100 shadow-sm p-6 flex flex-col h-fit relative">
+          <div className="absolute top-6 right-6">
+            <TreeIcon level={getLevel('sandhiRules', '3+3')} className="scale-125 origin-top-right" />
+          </div>
           <div className="text-rose-600 font-black text-2xl mb-4">3 + 3</div>
           <h3 className="text-slate-800 font-bold text-lg mb-3">Biến điệu của hai Thanh 3</h3>
           <p className="text-slate-600 text-sm mb-5 leading-relaxed">
@@ -70,7 +76,10 @@ export default function ToneSandhiRules() {
         </div>
 
         {/* CARD 2: Yī */}
-        <div className="bg-white rounded-3xl border border-amber-100 shadow-sm p-6 flex flex-col h-fit">
+        <div className="bg-white rounded-3xl border border-amber-100 shadow-sm p-6 flex flex-col h-fit relative">
+          <div className="absolute top-6 right-6">
+            <TreeIcon level={getLevel('sandhiRules', 'yi')} className="scale-125 origin-top-right" />
+          </div>
           <div className="flex flex-col mb-4">
             <div className="text-amber-500 font-black text-2xl">一</div>
             <div className="text-amber-600 font-bold">(Yī)</div>
@@ -112,7 +121,10 @@ export default function ToneSandhiRules() {
         </div>
 
         {/* CARD 3: Bù */}
-        <div className="bg-white rounded-3xl border border-blue-100 shadow-sm p-6 flex flex-col h-fit">
+        <div className="bg-white rounded-3xl border border-blue-100 shadow-sm p-6 flex flex-col h-fit relative">
+          <div className="absolute top-6 right-6">
+            <TreeIcon level={getLevel('sandhiRules', 'bu')} className="scale-125 origin-top-right" />
+          </div>
           <div className="flex flex-col mb-4">
             <div className="text-blue-500 font-black text-2xl">不</div>
             <div className="text-blue-600 font-bold">(Bù)</div>
