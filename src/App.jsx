@@ -30,7 +30,14 @@ function App() {
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'table' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <Grid size={16} />
-              <span className="hidden sm:inline">Tra cứu & Luyện Ghép</span>
+              <span className="hidden sm:inline">Tra cứu</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('tone-pair')}
+              className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'tone-pair' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <Volume2 size={16} />
+              <span className="hidden sm:inline">Luyện Ghép</span>
             </button>
             <button 
               onClick={() => setActiveTab('quiz')}
@@ -72,14 +79,17 @@ function App() {
                   </span>
                 </div>
 
-                {/* Tone Pair Sandbox Area */}
-                <TonePairPractice />
-
                 {/* Table Area */}
                 <div className="mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-none border-y border-slate-200 bg-slate-50 shadow-sm sm:rounded-2xl sm:border mx-4">
                   <PinyinTable />
                 </div>
               </>
+            ) : activeTab === 'tone-pair' ? (
+              <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 flex items-start justify-center">
+                <div className="w-full max-w-5xl">
+                  <TonePairPractice />
+                </div>
+              </div>
             ) : (
               <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100">
                 <QuizMode />
