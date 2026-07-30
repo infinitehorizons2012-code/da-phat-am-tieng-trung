@@ -32,16 +32,12 @@ export const applyTone = (syllable, tone) => {
   return syllable;
 };
 
-// Global audio object để có thể dừng khi đang phát dở và tránh bị chặn Autoplay trên Safari
-let globalAudio = null;
+// Global audio object để có thể dừng khi đang phát dở
+let currentAudio = null;
 
 export const playPinyinAudio = (text, onEnd, onStatus) => {
   stopAudio();
   
-  if (!globalAudio) {
-    globalAudio = new Audio();
-  }
-
   let fileName = pinyinToNumber(text);
   
   let isNeutral = false;
@@ -71,24 +67,28 @@ export const playPinyinAudio = (text, onEnd, onStatus) => {
     
     if (onStatus) onStatus(cdnList[currentTry].name);
     const url = cdnList[currentTry].url;
+    const audio = new Audio(url);
     
-    // Tái sử dụng globalAudio
-    globalAudio.src = url;
-    globalAudio.playbackRate = isNeutral ? 1.3 : 1.0;
-    globalAudio.volume = isNeutral ? 0.6 : 1.0;
+    if (isNeutral) {
+      audio.playbackRate = 1.3;
+      audio.volume = 0.6;
+    }
     
-    // Dọn dẹp event cũ
-    globalAudio.onended = () => {
-      globalAudio.onended = null;
+    // Gán ngay để hàm stopAudio() có thể dừng
+    currentAudio = audio;
+    
+    audio.onended = () => {
+      audio.onended = null;
       if (onEnd) onEnd();
     };
     
-    globalAudio.onerror = () => {
+    audio.onerror = () => {
       currentTry++;
-      tryNext();
+      tryNext(); // Nếu file lỗi (404) hoặc mạng chặn, thử link tiếp theo
     };
     
-    globalAudio.play().catch(error => {
+    audio.play().catch(error => {
+      // Nếu bị chặn autoplay hoặc đứt mạng
       currentTry++;
       tryNext();
     });
@@ -121,12 +121,13 @@ export const playAudioSequence = (syllablesData, onProgress, onComplete) => {
 };
 
 export const stopAudio = () => {
-  if (globalAudio) {
-    globalAudio.pause();
-    globalAudio.onended = null;
-    globalAudio.onerror = null;
-    globalAudio.ontimeupdate = null;
-    // Không xoá src hoặc currentTime để tránh lỗi DOMException trên một số trình duyệt
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.onended = null;
+    currentAudio.onerror = null;
+    currentAudio.ontimeupdate = null;
+    currentAudio.currentTime = 0;
+    currentAudio = null;
   }
 };
 
@@ -234,28 +235,28 @@ export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus)
     if (onStatus) onStatus(`Đang đọc: ${sequenceAudios[currentIndex].text}`);
     
     // Sử dụng audio đã được pre-load và unlock
-    globalAudio = sequenceAudios[currentIndex].audio;
+    currentAudio = sequenceAudios[currentIndex].audio;
     
     const handleEnd = () => {
-      if (globalAudio) {
-        globalAudio.ontimeupdate = null;
-        globalAudio.onended = null;
-        globalAudio.onerror = null;
+      if (currentAudio) {
+        currentAudio.ontimeupdate = null;
+        currentAudio.onended = null;
+        currentAudio.onerror = null;
       }
       currentIndex++;
       playNext();
     };
     
-    globalAudio.onended = handleEnd;
+    currentAudio.onended = handleEnd;
     
-    globalAudio.onerror = () => {
+    currentAudio.onerror = () => {
       console.warn(`Lỗi khi phát audio ${sequenceAudios[currentIndex].text}`);
       handleEnd(); // Bỏ qua và phát tiếp
     };
     
     // Hack: Tăng tốc độ phát của audio hiện tại để nghe mượt và liền mạch hơn
     if (currentIndex < tokens.length - 1) {
-      globalAudio.ontimeupdate = function() {
+      currentAudio.ontimeupdate = function() {
         const duration = this.duration || 0.8;
         const cutTime = Math.max(0.1, duration - 0.2);
         if (this.currentTime >= cutTime) {
@@ -266,10 +267,10 @@ export const playContinuousSequence = (tokens, onProgress, onComplete, onStatus)
         }
       };
     } else {
-      globalAudio.ontimeupdate = null;
+      currentAudio.ontimeupdate = null;
     }
     
-    globalAudio.play().catch(error => {
+    currentAudio.play().catch(error => {
       console.warn("Autoplay blocked or network error", error);
       handleEnd();
     });
