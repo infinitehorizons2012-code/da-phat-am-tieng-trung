@@ -85,7 +85,7 @@ export const playPinyinAudio = (text, onEnd, onStatus) => {
   
   // Sử dụng nguồn Cloudinary cá nhân để đảm bảo đầy đủ âm tiết và ổn định
   const cdnList = [
-    { name: 'Cloudinary', url: `https://res.cloudinary.com/zopjocdi/video/upload/da-phat-am-tieng-trung/audio/${fileName}.mp3` }
+    { name: 'Cloudinary', url: `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/video/upload/v1785510341/da-phat-am-tieng-trung/audio/${fileName}.mp3` }
   ];
   
   let currentTry = 0;
