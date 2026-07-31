@@ -25,6 +25,7 @@ export const ProgressProvider = ({ children }) => {
   // Levels: 0 (Hạt giống), 1 (Mầm non), 2 (Cây nhỏ), 3 (Cây nở hoa), 4 (Cây có quả)
   const [progress, setProgress] = useState(null);
   const [xp, setXp] = useState(0);
+  const [lp, setLp] = useState(0); // Leaf Points (Điểm năng lực)
   const [loading, setLoading] = useState(true);
 
   // Khởi tạo progress mặc định
@@ -43,6 +44,7 @@ export const ProgressProvider = ({ children }) => {
     if (!currentUser) {
       setProgress(null);
       setXp(0);
+      setLp(0);
       setLoading(false);
       return;
     }
@@ -55,12 +57,14 @@ export const ProgressProvider = ({ children }) => {
       if (docSnap.exists()) {
         setProgress(docSnap.data().progress || getEmptyProgress());
         setXp(docSnap.data().xp || 0);
+        setLp(docSnap.data().lp || 0);
       } else {
         // Tạo document mới nếu user lần đầu đăng nhập
         const newProgress = getEmptyProgress();
-        setDoc(userDocRef, { progress: newProgress, xp: 0 }, { merge: true });
+        setDoc(userDocRef, { progress: newProgress, xp: 0, lp: 0 }, { merge: true });
         setProgress(newProgress);
         setXp(0);
+        setLp(0);
       }
       setLoading(false);
     }, (error) => {
@@ -78,6 +82,16 @@ export const ProgressProvider = ({ children }) => {
       const newXp = prevXp + amount;
       setDoc(doc(db, 'users', currentUser.uid), { xp: newXp }, { merge: true });
       return newXp;
+    });
+  };
+
+  // Hàm thêm LP
+  const addLp = async (amount) => {
+    if (!currentUser) return;
+    setLp(prevLp => {
+      const newLp = prevLp + amount;
+      setDoc(doc(db, 'users', currentUser.uid), { lp: newLp }, { merge: true });
+      return newLp;
     });
   };
 
@@ -209,9 +223,11 @@ export const ProgressProvider = ({ children }) => {
     <ProgressContext.Provider value={{
       progress,
       xp,
+      lp,
       loading,
       updateScore,
       addXp,
+      addLp,
       promoteToLevel4,
       getLevel,
       getGlobalProgressPercentage,

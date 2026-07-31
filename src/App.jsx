@@ -16,10 +16,14 @@ function App() {
   const [activeTab, setActiveTab] = useState('table');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [xpBump, setXpBump] = useState(false);
+  const [lpBump, setLpBump] = useState(false);
+  const [quizKey, setQuizKey] = useState(0);
+  const [isQuizPaused, setIsQuizPaused] = useState(false);
   
   const { currentUser, logout, deleteAccount } = useAuth();
-  const { xp } = useProgress();
+  const { xp, lp } = useProgress();
   const prevXp = useRef(xp);
+  const prevLp = useRef(lp);
 
   useEffect(() => {
     if (xp > prevXp.current) {
@@ -31,6 +35,27 @@ function App() {
       prevXp.current = xp;
     }
   }, [xp]);
+
+  useEffect(() => {
+    if (lp > prevLp.current) {
+      setLpBump(true);
+      const timer = setTimeout(() => setLpBump(false), 500);
+      prevLp.current = lp;
+      return () => clearTimeout(timer);
+    } else {
+      prevLp.current = lp;
+    }
+  }, [lp]);
+
+  const handleTabChange = (tab) => {
+    if (tab === 'quiz') {
+      if (!isQuizPaused) {
+        setQuizKey(k => k + 1); // Reset quiz nếu không phải là đang "Ra ngoài học bài"
+      }
+      setIsQuizPaused(false);
+    }
+    setActiveTab(tab);
+  };
 
   useEffect(() => {
     const handleStartExam = () => setActiveTab('exam');
@@ -73,21 +98,21 @@ function App() {
             {/* Tabs Navigation */}
             <div className="flex bg-slate-100 p-1 rounded-lg shrink-0">
             <button 
-              onClick={() => setActiveTab('table')}
+              onClick={() => handleTabChange('table')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'table' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <Grid size={16} />
               <span className="hidden sm:inline">Tra cứu</span>
             </button>
             <button 
-              onClick={() => setActiveTab('summary')}
+              onClick={() => handleTabChange('summary')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'summary' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <BookOpen size={16} />
               <span className="hidden sm:inline">Tổng hợp</span>
             </button>
             <button 
-              onClick={() => setActiveTab('sandhi-rules')}
+              onClick={() => handleTabChange('sandhi-rules')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'sandhi-rules' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <Zap size={16} />
@@ -95,28 +120,28 @@ function App() {
             </button>
 
             <button 
-              onClick={() => setActiveTab('tone-matrix')}
+              onClick={() => handleTabChange('tone-matrix')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'tone-matrix' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <LayoutGrid size={16} />
               <span className="hidden sm:inline">Ma trận âm điệu</span>
             </button>
             <button 
-              onClick={() => setActiveTab('tone-pair')}
+              onClick={() => handleTabChange('tone-pair')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'tone-pair' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <Volume2 size={16} />
               <span className="hidden sm:inline">Luyện Ghép</span>
             </button>
             <button 
-              onClick={() => setActiveTab('quiz')}
+              onClick={() => handleTabChange('quiz')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'quiz' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <Headphones size={16} />
               <span className="hidden sm:inline">Trắc nghiệm</span>
             </button>
             <button 
-              onClick={() => setActiveTab('progress')}
+              onClick={() => handleTabChange('progress')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'progress' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <TreePine size={16} />
@@ -131,10 +156,16 @@ function App() {
                 <div className="flex items-center gap-3">
                   <div className="hidden md:flex flex-col items-end">
                     <span className="text-sm font-bold text-slate-700 leading-none">{currentUser.displayName || 'Bé ngoan'}</span>
-                    <span className={`text-[11px] font-black flex items-center gap-1 mt-0.5 transition-all duration-300 ${xpBump ? 'text-amber-600 scale-125' : 'text-amber-500'}`}>
-                      <Zap size={10} className={xpBump ? 'fill-amber-600' : 'fill-amber-500'} /> 
-                      {xp || 0} XP
-                    </span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={`text-[11px] font-black flex items-center gap-1 transition-all duration-300 ${xpBump ? 'text-amber-600 scale-125' : 'text-amber-500'}`}>
+                        <Zap size={10} className={xpBump ? 'fill-amber-600' : 'fill-amber-500'} /> 
+                        {xp || 0} XP
+                      </span>
+                      <span className={`text-[11px] font-black flex items-center gap-1 transition-all duration-300 ${lpBump ? 'text-emerald-600 scale-125' : 'text-emerald-500'}`}>
+                        <TreePine size={10} className={lpBump ? 'text-emerald-600' : 'text-emerald-500'} /> 
+                        {lp || 0} LP
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-1.5">
                     <button 
@@ -225,11 +256,9 @@ function App() {
                 </div>
               </div>
             )}
-            {activeTab === 'quiz' && (
-              <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100">
-                <QuizMode />
-              </div>
-            )}
+            <div className={`flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 ${activeTab === 'quiz' ? 'block' : 'hidden'}`}>
+              <QuizMode key={quizKey} onPauseQuiz={() => { setIsQuizPaused(true); setActiveTab('table'); }} />
+            </div>
             {activeTab === 'progress' && (
               <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-100">
                 <ProgressDashboard />

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { generateQuizRound, generateRandomQuizRound, generateToneQuizRound, generateTonePairQuizRound, generateSpellingQuizRound } from '../data/quizData';
 import { applyTone, playPinyinAudio, playContinuousSequence, applyToneSandhi } from '../utils/pinyinUtils';
 import { pinyinMatrix } from '../data/pinyinData';
-import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe, Pencil, Zap, LifeBuoy } from 'lucide-react';
+import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe, Pencil, Zap, LifeBuoy, TreePine, LogOut } from 'lucide-react';
 import { useProgress } from '../context/ProgressContext';
 
-export default function QuizMode() {
+export default function QuizMode({ onPauseQuiz }) {
   const [mode, setMode] = useState('confusing'); // 'confusing' or 'all'
   const [questions, setQuestions] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -16,8 +16,9 @@ export default function QuizMode() {
   const [roundResults, setRoundResults] = useState([]);
   const [questionCount, setQuestionCount] = useState(10);
   const [flyingXp, setFlyingXp] = useState([]);
+  const [flyingLp, setFlyingLp] = useState([]);
 
-  const { updateScore, progress, addXp, xp } = useProgress();
+  const { updateScore, progress, addXp, xp, addLp, lp } = useProgress();
 
   // Khởi tạo vòng mới
   const startNewRound = (newMode = mode, count = questionCount) => {
@@ -169,6 +170,16 @@ export default function QuizMode() {
           }
         }
       });
+
+      // Thưởng 50 LP khi hoàn thành bài thi
+      addLp(50);
+      
+      // Animation bay LP
+      const id = Date.now();
+      setFlyingLp(prev => [...prev, id]);
+      setTimeout(() => {
+        setFlyingLp(prev => prev.filter(x => x !== id));
+      }, 2000);
     }
   }, [isFinished]);
 
@@ -430,17 +441,34 @@ export default function QuizMode() {
           </div>
         </div>
         
-        <div className="w-full sm:w-1/3 flex justify-center">
+        <div className="w-full sm:w-1/3 flex flex-col items-center justify-center gap-3">
           {isAnswered && !isSelectedCorrect && (
             <button 
               onClick={handleRescue} 
-              className="flex items-center gap-2 px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-xl text-sm font-bold transition-transform hover:scale-105 shadow-sm border border-rose-200"
+              className="flex items-center justify-center w-full max-w-[200px] gap-2 px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-xl text-sm font-bold transition-transform hover:scale-105 shadow-sm border border-rose-200"
               title="Cứu (Trừ 120 XP)"
             >
               <LifeBuoy size={16} />
               Cứu câu này (-120 XP)
             </button>
           )}
+          <button 
+            onClick={() => {
+              if (lp >= 100) {
+                if (window.confirm("Bạn có muốn dùng 100 LP để giữ nguyên câu hỏi và ra ngoài tra cứu không? (Quay lại tab Trắc nghiệm sẽ tiếp tục câu hiện tại)")) {
+                  addLp(-100);
+                  if (onPauseQuiz) onPauseQuiz();
+                }
+              } else {
+                alert("Bạn không đủ LP để ra ngoài học bài. Cần 100 LP (Hoàn thành bài trắc nghiệm để được thưởng LP)!");
+              }
+            }} 
+            className="flex items-center justify-center w-full max-w-[200px] gap-2 px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl text-sm font-bold transition-transform hover:scale-105 shadow-sm border border-emerald-200"
+            title="Ra ngoài học bài (Trừ 100 LP)"
+          >
+            <LogOut size={16} />
+            Ra ngoài học bài (-100 LP)
+          </button>
         </div>
         
         <div className="w-full sm:w-1/3 flex flex-col items-center sm:items-end text-center sm:text-right">
@@ -461,6 +489,17 @@ export default function QuizMode() {
         >
           <Zap className="fill-amber-500" size={24} />
           +30 XP
+        </div>
+      ))}
+      
+      {/* Render flying LP animations */}
+      {flyingLp.map(id => (
+        <div 
+          key={`lp-${id}`} 
+          className="fixed z-[100] pointer-events-none animate-fly-xp flex items-center gap-1 text-emerald-500 font-black text-3xl drop-shadow-lg"
+        >
+          <TreePine className="text-emerald-500" size={32} />
+          +50 LP
         </div>
       ))}
     </div>
