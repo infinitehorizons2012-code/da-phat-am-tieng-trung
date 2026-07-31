@@ -435,8 +435,13 @@ export default function QuizMode() {
           )}
         </div>
         
-        <div className="font-bold text-slate-500 text-sm w-full sm:w-1/3 text-center sm:text-right">
-          Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}
+        <div className="w-full sm:w-1/3 flex flex-col items-center sm:items-end text-center sm:text-right">
+          <div className="font-bold text-slate-500 text-sm">
+            Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}
+          </div>
+          <div className="text-[11px] text-slate-400 mt-0.5 italic font-medium">
+            * Hoàn thành hết trắc nghiệm mới tính điểm khu vườn
+          </div>
         </div>
       </div>
     </div>
