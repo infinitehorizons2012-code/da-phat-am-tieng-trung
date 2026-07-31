@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { generateQuizRound, generateRandomQuizRound, generateToneQuizRound, generateTonePairQuizRound, generateSpellingQuizRound } from '../data/quizData';
 import { applyTone, playPinyinAudio, playContinuousSequence, applyToneSandhi } from '../utils/pinyinUtils';
 import { pinyinMatrix } from '../data/pinyinData';
-import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe, Pencil } from 'lucide-react';
+import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, RotateCcw, Target, Globe, Pencil, Zap, LifeBuoy } from 'lucide-react';
 import { useProgress } from '../context/ProgressContext';
 
 export default function QuizMode() {
@@ -14,41 +14,50 @@ export default function QuizMode() {
   const [isFinished, setIsFinished] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [roundResults, setRoundResults] = useState([]);
+  const [questionCount, setQuestionCount] = useState(10);
 
-  const { updateScore, progress, addXp } = useProgress();
+  const { updateScore, progress, addXp, xp } = useProgress();
 
   // Khởi tạo vòng mới
-  const startNewRound = (newMode = mode) => {
+  const startNewRound = (newMode = mode, count = questionCount) => {
     if (newMode === 'confusing') {
-      setQuestions(generateQuizRound(10, progress));
+      setQuestions(generateQuizRound(count, progress));
     } else if (newMode === 'tone') {
-      setQuestions(generateToneQuizRound(10, progress));
+      setQuestions(generateToneQuizRound(count, progress));
     } else if (newMode === 'tonepair') {
-      setQuestions(generateTonePairQuizRound(10, progress));
+      setQuestions(generateTonePairQuizRound(count, progress));
     } else if (newMode === 'spelling') {
-      setQuestions(generateSpellingQuizRound(10, progress));
+      setQuestions(generateSpellingQuizRound(count, progress));
     } else {
-      setQuestions(generateRandomQuizRound(10, progress));
+      setQuestions(generateRandomQuizRound(count, progress));
     }
     setCurrentIdx(0);
     setSelectedOption(null);
     setStats({ correct: 0, wrong: 0 });
     setIsFinished(false);
+    setRoundResults([]);
   };
 
   useEffect(() => {
-    startNewRound();
+    startNewRound(mode, questionCount);
   }, []);
 
   const handleModeChange = (newMode) => {
     setMode(newMode);
-    startNewRound(newMode);
+    startNewRound(newMode, questionCount);
+  };
+
+  const handleQuestionCountChange = (e) => {
+    const newCount = parseInt(e.target.value);
+    setQuestionCount(newCount);
+    startNewRound(mode, newCount);
   };
 
   const currentQuestion = questions[currentIdx];
 
   const playAudio = () => {
-    if (!currentQuestion || currentQuestion.isSpellingMode) return; // Không phát âm trong bài spelling
+    if (!currentQuestion || currentQuestion.isSpellingMode) return;
+    if (isPlaying) return;
     setIsPlaying(true);
     
     if (currentQuestion.isTonePairMode) {
@@ -73,7 +82,6 @@ export default function QuizMode() {
     if (selectedOption !== null) return;
     
     setSelectedOption(index);
-    // const isCorrect = currentQuestion.options[index].isCorrect;
     
     if (isCorrect) {
       setStats(prev => ({ ...prev, correct: prev.correct + 1 }));
@@ -87,6 +95,19 @@ export default function QuizMode() {
       isCorrect: isCorrect,
       currentMode: mode
     }]);
+  };
+
+  const handleRescue = () => {
+    if (xp >= 120) {
+      if (window.confirm("Bạn có muốn dùng 120 XP để làm lại câu này không?")) {
+        addXp(-120);
+        setSelectedOption(null);
+        setStats(prev => ({ ...prev, wrong: Math.max(0, prev.wrong - 1) }));
+        setRoundResults(prev => prev.slice(0, -1)); // Loại bỏ kết quả sai vừa lưu
+      }
+    } else {
+      alert("Bạn không đủ XP để đổi cơ hội. Cần 120 XP!");
+    }
   };
 
   const handleNext = () => {
@@ -229,6 +250,16 @@ export default function QuizMode() {
             <span className="hidden sm:inline">Quy tắc chính tả</span>
             <span className="sm:hidden">Chính tả</span>
           </button>
+          <select 
+            value={questionCount} 
+            onChange={handleQuestionCountChange}
+            className="ml-1 sm:ml-2 bg-white text-slate-600 font-bold text-xs px-2 py-1.5 rounded-md border border-slate-200 outline-none cursor-pointer"
+          >
+            <option value={5}>5 câu</option>
+            <option value={10}>10 câu</option>
+            <option value={15}>15 câu</option>
+            <option value={20}>20 câu</option>
+          </select>
         </div>
       </div>
       <div className="w-full bg-slate-100 h-2">
@@ -386,8 +417,8 @@ export default function QuizMode() {
       </div>
 
       {/* Footer Stats */}
-      <div className="bg-slate-100/50 px-6 py-4 flex items-center justify-between gap-4 border-t border-slate-200">
-        <div className="flex items-center gap-4">
+      <div className="bg-slate-100/50 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
+        <div className="flex items-center gap-4 w-full sm:w-1/3">
           <div className="flex -space-x-2">
             <div className="w-8 h-8 rounded-full bg-rose-200 border-2 border-white flex items-center justify-center text-xs">👩</div>
             <div className="w-8 h-8 rounded-full bg-blue-200 border-2 border-white flex items-center justify-center text-xs">👦</div>
@@ -398,7 +429,20 @@ export default function QuizMode() {
           </div>
         </div>
         
-        <div className="font-bold text-slate-500 text-sm text-right">
+        <div className="w-full sm:w-1/3 flex justify-center">
+          {isAnswered && !isSelectedCorrect && (
+            <button 
+              onClick={handleRescue} 
+              className="flex items-center gap-2 px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-xl text-sm font-bold transition-transform hover:scale-105 shadow-sm border border-rose-200"
+              title="Cứu (Trừ 120 XP)"
+            >
+              <LifeBuoy size={16} />
+              Cứu câu này (-120 XP)
+            </button>
+          )}
+        </div>
+        
+        <div className="font-bold text-slate-500 text-sm w-full sm:w-1/3 text-center sm:text-right">
           Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}
         </div>
       </div>
