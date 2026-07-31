@@ -45,20 +45,20 @@ function App() {
       <div className="flex-1 w-full grid h-dvh min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden pb-0">
         
         {/* Header */}
-        <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm shrink-0">
-          <div className="flex items-center gap-3">
+        <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm shrink-0 gap-4">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="w-8 h-8 rounded bg-rose-500 text-white flex items-center justify-center font-bold shadow-sm">
               拼
             </div>
-            <div>
+            <div className="hidden md:block">
               <h1 className="font-black text-slate-800 text-lg md:text-xl tracking-tight leading-none">Bảng Pinyin</h1>
               <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-0.5">Bảng ghép pinyin tiếng Trung</div>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex-1 flex overflow-x-auto hide-scrollbar">
             {/* Tabs Navigation */}
-            <div className="flex bg-slate-100 p-1 rounded-lg">
+            <div className="flex bg-slate-100 p-1 rounded-lg shrink-0">
             <button 
               onClick={() => setActiveTab('table')}
               className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-md transition-colors ${activeTab === 'table' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
@@ -109,10 +109,11 @@ function App() {
               <TreePine size={16} />
               <span className="hidden sm:inline">Khu Vườn</span>
             </button>
+            </div>
           </div>
           
             {/* User Profile / Login */}
-            <div className="flex items-center">
+            <div className="flex items-center shrink-0">
               {currentUser ? (
                 <div className="flex items-center gap-3">
                   <div className="hidden md:flex flex-col items-end">
@@ -146,7 +147,6 @@ function App() {
                 </button>
               )}
             </div>
-          </div>
         </div>
 
         {/* Main Content */}
