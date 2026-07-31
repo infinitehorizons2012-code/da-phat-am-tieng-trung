@@ -85,11 +85,12 @@ export default function QuizMode() {
     
     if (isCorrect) {
       setStats(prev => ({ ...prev, correct: prev.correct + 1 }));
+      addXp(30); // Cấp XP ngay lập tức để trẻ có feedback tức thì
     } else {
       setStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
     }
 
-    // Tích lũy kết quả, chưa cộng điểm vội
+    // Tích lũy kết quả để cộng điểm năng lực cây trồng ở cuối vòng
     setRoundResults(prev => [...prev, {
       question: currentQuestion,
       isCorrect: isCorrect,
@@ -122,12 +123,9 @@ export default function QuizMode() {
   // Cập nhật điểm một lần duy nhất khi hoàn thành trọn vẹn vòng thi
   useEffect(() => {
     if (isFinished && roundResults.length > 0) {
-      let correctCount = 0;
       roundResults.forEach(res => {
         const { question, isCorrect, currentMode } = res;
         
-        if (isCorrect) correctCount++;
-
         if (question.isSpellingMode) {
           updateScore('spellingRules', question.ruleId || 'general', isCorrect);
         } else if (question.isTonePairMode) {
@@ -163,11 +161,6 @@ export default function QuizMode() {
           }
         }
       });
-
-      // Add XP for all correct answers in this round
-      if (correctCount > 0) {
-        addXp(correctCount * 30);
-      }
     }
   }, [isFinished]);
 
