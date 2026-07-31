@@ -476,7 +476,7 @@ export default function QuizMode({ onPauseQuiz }) {
             Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5 italic font-medium">
-            * Hoàn thành hết trắc nghiệm mới tính điểm khu vườn
+            * Hoàn thành hết trắc nghiệm mới tính điểm khu vườn và thu thập LP
           </div>
         </div>
       </div>
