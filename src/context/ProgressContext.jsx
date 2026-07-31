@@ -24,6 +24,7 @@ export const ProgressProvider = ({ children }) => {
   // }
   // Levels: 0 (Hạt giống), 1 (Mầm non), 2 (Cây nhỏ), 3 (Cây nở hoa), 4 (Cây có quả)
   const [progress, setProgress] = useState(null);
+  const [xp, setXp] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Khởi tạo progress mặc định
@@ -41,6 +42,7 @@ export const ProgressProvider = ({ children }) => {
   useEffect(() => {
     if (!currentUser) {
       setProgress(null);
+      setXp(0);
       setLoading(false);
       return;
     }
@@ -52,11 +54,13 @@ export const ProgressProvider = ({ children }) => {
     const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
       if (docSnap.exists()) {
         setProgress(docSnap.data().progress || getEmptyProgress());
+        setXp(docSnap.data().xp || 0);
       } else {
         // Tạo document mới nếu user lần đầu đăng nhập
         const newProgress = getEmptyProgress();
-        setDoc(userDocRef, { progress: newProgress }, { merge: true });
+        setDoc(userDocRef, { progress: newProgress, xp: 0 }, { merge: true });
         setProgress(newProgress);
+        setXp(0);
       }
       setLoading(false);
     }, (error) => {
@@ -66,6 +70,16 @@ export const ProgressProvider = ({ children }) => {
 
     return unsubscribe;
   }, [currentUser]);
+
+  // Hàm thêm XP
+  const addXp = async (amount) => {
+    if (!currentUser) return;
+    setXp(prevXp => {
+      const newXp = prevXp + amount;
+      setDoc(doc(db, 'users', currentUser.uid), { xp: newXp }, { merge: true });
+      return newXp;
+    });
+  };
 
   // Hàm cập nhật điểm số
   // category: 'initials' | 'finals' | 'tones' | 'syllables' | 'tonePairs' | 'sandhiRules' | 'spellingRules'
@@ -191,18 +205,18 @@ export const ProgressProvider = ({ children }) => {
     }
   };
 
-  const value = {
-    progress,
-    loading,
-    updateScore,
-    promoteToLevel4,
-    getLevel,
-    getGlobalProgressPercentage,
-    processExamResults
-  };
-
   return (
-    <ProgressContext.Provider value={value}>
+    <ProgressContext.Provider value={{
+      progress,
+      xp,
+      loading,
+      updateScore,
+      addXp,
+      promoteToLevel4,
+      getLevel,
+      getGlobalProgressPercentage,
+      processExamResults
+    }}>
       {children}
     </ProgressContext.Provider>
   );

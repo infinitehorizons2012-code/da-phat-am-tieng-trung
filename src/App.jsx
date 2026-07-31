@@ -9,6 +9,7 @@ import ProgressDashboard from './components/ProgressDashboard';
 import FinalExamMode from './components/FinalExamMode';
 import LoginModal from './components/LoginModal';
 import { useAuth } from './context/AuthContext';
+import { useProgress } from './context/ProgressContext';
 import { Volume2, Play, Grid, Headphones, LayoutGrid, BookOpen, Zap, User, LogOut, TreePine, Trash2 } from 'lucide-react';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   
   const { currentUser, logout, deleteAccount } = useAuth();
+  const { xp } = useProgress();
 
   useEffect(() => {
     const handleStartExam = () => setActiveTab('exam');
@@ -115,7 +117,7 @@ function App() {
                 <div className="flex items-center gap-3">
                   <div className="hidden md:flex flex-col items-end">
                     <span className="text-sm font-bold text-slate-700 leading-none">{currentUser.displayName || 'Bé ngoan'}</span>
-                    <span className="text-[10px] text-slate-400 font-medium">Đang học Pinyin</span>
+                    <span className="text-[11px] text-amber-500 font-black flex items-center gap-1 mt-0.5"><Zap size={10} className="fill-amber-500" /> {xp || 0} XP</span>
                   </div>
                   <div className="flex gap-1.5">
                     <button 

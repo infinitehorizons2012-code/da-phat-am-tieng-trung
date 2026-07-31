@@ -13,8 +13,9 @@ export default function QuizMode() {
   const [stats, setStats] = useState({ correct: 0, wrong: 0 });
   const [isFinished, setIsFinished] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [roundResults, setRoundResults] = useState([]);
 
-  const { updateScore, progress } = useProgress();
+  const { updateScore, progress, addXp } = useProgress();
 
   // Khởi tạo vòng mới
   const startNewRound = (newMode = mode) => {
@@ -68,19 +69,6 @@ export default function QuizMode() {
     }
   };
 
-  // Tự động phát âm thanh khi chuyển câu (Đã tắt theo yêu cầu)
-  /*
-  useEffect(() => {
-    if (currentQuestion && selectedOption === null) {
-      // Delay chút để UI render xong rồi mới phát âm
-      const timer = setTimeout(() => {
-        playAudio();
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [currentIdx, currentQuestion]);
-  */
-
   const handleSelect = (index, isCorrect) => {
     if (selectedOption !== null) return;
     
@@ -113,9 +101,12 @@ export default function QuizMode() {
   // Cập nhật điểm một lần duy nhất khi hoàn thành trọn vẹn vòng thi
   useEffect(() => {
     if (isFinished && roundResults.length > 0) {
+      let correctCount = 0;
       roundResults.forEach(res => {
         const { question, isCorrect, currentMode } = res;
         
+        if (isCorrect) correctCount++;
+
         if (question.isSpellingMode) {
           updateScore('spellingRules', question.ruleId || 'general', isCorrect);
         } else if (question.isTonePairMode) {
@@ -151,6 +142,11 @@ export default function QuizMode() {
           }
         }
       });
+
+      // Add XP for all correct answers in this round
+      if (correctCount > 0) {
+        addXp(correctCount * 30);
+      }
     }
   }, [isFinished]);
 
@@ -233,10 +229,6 @@ export default function QuizMode() {
             <span className="hidden sm:inline">Quy tắc chính tả</span>
             <span className="sm:hidden">Chính tả</span>
           </button>
-        </div>
-
-        <div className="font-bold text-slate-500 text-sm w-full sm:w-auto text-right">
-          Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}
         </div>
       </div>
       <div className="w-full bg-slate-100 h-2">
@@ -394,14 +386,20 @@ export default function QuizMode() {
       </div>
 
       {/* Footer Stats */}
-      <div className="bg-slate-100/50 px-6 py-4 flex items-center gap-4 border-t border-slate-200">
-        <div className="flex -space-x-2">
-          <div className="w-8 h-8 rounded-full bg-rose-200 border-2 border-white flex items-center justify-center text-xs">👩</div>
-          <div className="w-8 h-8 rounded-full bg-blue-200 border-2 border-white flex items-center justify-center text-xs">👦</div>
-          <div className="w-8 h-8 rounded-full bg-emerald-200 border-2 border-white flex items-center justify-center text-xs">👱</div>
+      <div className="bg-slate-100/50 px-6 py-4 flex items-center justify-between gap-4 border-t border-slate-200">
+        <div className="flex items-center gap-4">
+          <div className="flex -space-x-2">
+            <div className="w-8 h-8 rounded-full bg-rose-200 border-2 border-white flex items-center justify-center text-xs">👩</div>
+            <div className="w-8 h-8 rounded-full bg-blue-200 border-2 border-white flex items-center justify-center text-xs">👦</div>
+            <div className="w-8 h-8 rounded-full bg-emerald-200 border-2 border-white flex items-center justify-center text-xs">👱</div>
+          </div>
+          <div className="font-bold text-slate-500 text-xs uppercase tracking-wider">
+            ĐÚNG: {stats.correct} | SAI: {stats.wrong} | ĐÃ LÀM: {currentIdx + (isFinished?0:1)} / {questions.length}
+          </div>
         </div>
-        <div className="font-bold text-slate-500 text-xs uppercase tracking-wider">
-          ĐÚNG: {stats.correct} | SAI: {stats.wrong} | ĐÃ LÀM: {currentIdx + (isFinished?0:1)} / {questions.length}
+        
+        <div className="font-bold text-slate-500 text-sm text-right">
+          Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}
         </div>
       </div>
     </div>

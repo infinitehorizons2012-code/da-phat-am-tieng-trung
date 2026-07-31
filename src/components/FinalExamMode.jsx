@@ -6,7 +6,7 @@ import { applyToneSandhi, playContinuousSequence, applyTone, playPinyinAudio } f
 import { Headphones, Volume2, CheckCircle2, XCircle, ArrowRight, Play, AlertCircle, Timer } from 'lucide-react';
 
 export default function FinalExamMode({ onExit }) {
-  const { progress, getGlobalProgressPercentage, processExamResults } = useProgress();
+  const { progress, getGlobalProgressPercentage, processExamResults, addXp } = useProgress();
   const [questions, setQuestions] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -18,6 +18,21 @@ export default function FinalExamMode({ onExit }) {
   
   const [tracker, setTracker] = useState({});
   const [examPassed, setExamPassed] = useState(false);
+
+  const endExam = (isTimeOut = false) => {
+    setIsFinished(true);
+    let totalCorrect = 0;
+    Object.values(tracker).forEach(t => {
+      totalCorrect += t.correctCount;
+    });
+    const passed = totalCorrect >= 17;
+    setExamPassed(passed);
+    const resultsArray = Object.values(tracker);
+    processExamResults(resultsArray, passed);
+    if (totalCorrect > 0) {
+      addXp(totalCorrect * 30);
+    }
+  };
 
   useEffect(() => {
     if (getGlobalProgressPercentage() < 100) {
