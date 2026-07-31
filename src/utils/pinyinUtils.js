@@ -72,16 +72,7 @@ export const playPinyinAudio = (text, onEnd, onStatus) => {
     fileName = fileName.slice(0, -1) + '1'; 
   }
 
-  // Handle specific filename mismatches with Cloudinary
-  if (fileName.startsWith('nve')) {
-    fileName = fileName.replace('nve', 'n%C3%BCe');
-  } else if (fileName.startsWith('lve')) {
-    fileName = fileName.replace('lve', 'l%C3%BCe');
-  } else if (fileName.startsWith('nv')) {
-    fileName = fileName.replace('nv', 'nu');
-  } else if (fileName.startsWith('lv')) {
-    fileName = fileName.replace('lv', 'lu');
-  }
+
   
   // Sử dụng nguồn Cloudinary cá nhân để đảm bảo đầy đủ âm tiết và ổn định
   const cdnList = [
