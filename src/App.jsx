@@ -256,7 +256,7 @@ function App() {
                 </div>
               </div>
             )}
-            <div className={`flex-1 overflow-auto p-4 sm:p-6 bg-slate-100 ${activeTab === 'quiz' ? 'block' : 'hidden'}`}>
+            <div className={`flex-1 overflow-hidden p-2 sm:p-4 bg-slate-100 flex-col ${activeTab === 'quiz' ? 'flex' : 'hidden'}`}>
               <QuizMode key={quizKey} onPauseQuiz={() => { setIsQuizPaused(true); setActiveTab('table'); }} />
             </div>
             {activeTab === 'progress' && (

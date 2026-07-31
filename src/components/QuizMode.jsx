@@ -217,9 +217,9 @@ export default function QuizMode({ onPauseQuiz }) {
   const isSelectedCorrect = isAnswered && currentQuestion.options[selectedOption].isCorrect;
 
   return (
-    <div className="flex flex-col max-w-5xl mx-auto w-full bg-slate-50 rounded-2xl shadow-sm border border-slate-200 overflow-hidden my-4">
+    <div className="flex flex-col flex-1 min-h-0 max-w-5xl mx-auto w-full bg-slate-50 rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
       {/* Top Header / Progress */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-3 border-b border-slate-200 bg-white gap-3">
+      <div className="shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-2 border-b border-slate-200 bg-white gap-3">
         
         <div className="flex bg-slate-100 p-1 rounded-lg w-full sm:w-auto overflow-x-auto hide-scrollbar">
           <button 
@@ -274,14 +274,14 @@ export default function QuizMode({ onPauseQuiz }) {
           </select>
         </div>
       </div>
-      <div className="w-full bg-slate-100 h-2">
+      <div className="shrink-0 w-full bg-slate-100 h-2">
         <div 
           className={`${mode === 'all' ? 'bg-purple-500' : mode === 'tone' ? 'bg-emerald-500' : mode === 'tonepair' ? 'bg-amber-500' : mode === 'spelling' ? 'bg-rose-500' : 'bg-blue-500'} h-2 transition-all duration-300`} 
           style={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
         ></div>
       </div>
 
-      <div className="flex flex-col md:flex-row p-6 gap-6 md:gap-8 items-stretch">
+      <div className="flex-1 overflow-y-auto flex flex-col md:flex-row p-4 sm:p-6 gap-4 sm:gap-6 md:gap-8 items-stretch">
         {/* Left Panel (Audio Playback / Formula) */}
         <div className={`w-full md:w-1/3 ${mode === 'all' ? 'bg-purple-600' : mode === 'tone' ? 'bg-emerald-600' : mode === 'tonepair' ? 'bg-amber-500' : mode === 'spelling' ? 'bg-rose-500' : 'bg-blue-600'} rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden shadow-inner group ${!currentQuestion.isSpellingMode ? 'cursor-pointer' : ''} transition-colors`} onClick={!currentQuestion.isSpellingMode ? playAudio : undefined}>
           <div className="absolute top-4 bg-white/20 px-3 py-1 rounded-full text-white text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
@@ -359,9 +359,9 @@ export default function QuizMode({ onPauseQuiz }) {
                   key={idx}
                   onClick={() => handleSelect(idx, opt.isCorrect)}
                   disabled={isAnswered}
-                  className={`relative flex items-center justify-center p-4 rounded-2xl transition-all duration-200 ${btnClass} text-2xl font-black min-h-[5rem] group`}
+                  className={`relative flex items-center justify-center p-3 sm:p-4 rounded-2xl transition-all duration-200 ${btnClass} text-xl sm:text-2xl font-black min-h-[4rem] sm:min-h-[5rem] group`}
                 >
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-100 text-slate-400 text-xs flex items-center justify-center font-bold">
+                  <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-100 text-slate-400 text-[10px] sm:text-xs flex items-center justify-center font-bold">
                     {idx + 1}
                   </span>
                   <span>{displayLabel}</span>
@@ -416,7 +416,7 @@ export default function QuizMode({ onPauseQuiz }) {
             <button
               onClick={handleNext}
               disabled={!isAnswered}
-              className={`w-full py-4 rounded-xl font-black text-lg flex items-center justify-center gap-2 transition-all ${
+              className={`w-full py-3 sm:py-4 rounded-xl font-black text-base sm:text-lg flex items-center justify-center gap-2 transition-all ${
                 isAnswered 
                   ? 'bg-slate-800 text-white hover:bg-slate-900 shadow-md transform hover:-translate-y-0.5' 
                   : 'bg-slate-200 text-slate-400 cursor-not-allowed'
@@ -429,9 +429,9 @@ export default function QuizMode({ onPauseQuiz }) {
       </div>
 
       {/* Footer Stats */}
-      <div className="bg-slate-100/50 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
-        <div className="flex items-center gap-4 w-full sm:w-1/3">
-          <div className="flex -space-x-2">
+      <div className="shrink-0 bg-slate-100/50 px-4 sm:px-6 py-2 sm:py-3 flex flex-col lg:flex-row items-center justify-between gap-3 border-t border-slate-200">
+        <div className="flex items-center justify-center lg:justify-start gap-4 w-full lg:w-1/4">
+          <div className="hidden sm:flex -space-x-2">
             <div className="w-8 h-8 rounded-full bg-rose-200 border-2 border-white flex items-center justify-center text-xs">👩</div>
             <div className="w-8 h-8 rounded-full bg-blue-200 border-2 border-white flex items-center justify-center text-xs">👦</div>
             <div className="w-8 h-8 rounded-full bg-emerald-200 border-2 border-white flex items-center justify-center text-xs">👱</div>
@@ -441,14 +441,14 @@ export default function QuizMode({ onPauseQuiz }) {
           </div>
         </div>
         
-        <div className="w-full sm:w-1/3 flex flex-col items-center justify-center gap-3">
+        <div className="w-full lg:w-2/4 flex flex-row flex-wrap items-center justify-center gap-2">
           {isAnswered && !isSelectedCorrect && (
             <button 
               onClick={handleRescue} 
-              className="flex items-center justify-center w-full max-w-[200px] gap-2 px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-xl text-sm font-bold transition-transform hover:scale-105 shadow-sm border border-rose-200"
+              className="flex-1 min-w-[140px] max-w-[200px] flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-xl text-[11px] sm:text-xs font-bold transition-transform hover:scale-105 shadow-sm border border-rose-200"
               title="Cứu (Trừ 120 XP)"
             >
-              <LifeBuoy size={16} />
+              <LifeBuoy size={14} className="shrink-0" />
               Cứu câu này (-120 XP)
             </button>
           )}
@@ -463,16 +463,16 @@ export default function QuizMode({ onPauseQuiz }) {
                 alert("Bạn không đủ LP để ra ngoài học bài. Cần 100 LP (Hoàn thành bài trắc nghiệm để được thưởng LP)!");
               }
             }} 
-            className="flex items-center justify-center w-full max-w-[200px] gap-2 px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl text-sm font-bold transition-transform hover:scale-105 shadow-sm border border-emerald-200"
+            className="flex-1 min-w-[140px] max-w-[200px] flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl text-[11px] sm:text-xs font-bold transition-transform hover:scale-105 shadow-sm border border-emerald-200"
             title="Ra ngoài học bài (Trừ 100 LP)"
           >
-            <LogOut size={16} />
-            Ra ngoài học bài (-100 LP)
+            <LogOut size={14} className="shrink-0" />
+            Ra ngoài (-100 LP)
           </button>
         </div>
         
-        <div className="w-full sm:w-1/3 flex flex-col items-center sm:items-end text-center sm:text-right">
-          <div className="font-bold text-slate-500 text-sm">
+        <div className="w-full lg:w-1/4 flex flex-col items-center lg:items-end text-center lg:text-right">
+          <div className="font-bold text-slate-500 text-xs sm:text-sm">
             Câu hỏi hiện tại: {currentIdx + 1} / {questions.length}
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5 italic font-medium">
