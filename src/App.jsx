@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PinyinTable from './components/PinyinTable';
 import TonePairPractice from './components/TonePairPractice';
 import QuizMode from './components/QuizMode';
@@ -15,9 +15,22 @@ import { Volume2, Play, Grid, Headphones, LayoutGrid, BookOpen, Zap, User, LogOu
 function App() {
   const [activeTab, setActiveTab] = useState('table');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [xpBump, setXpBump] = useState(false);
   
   const { currentUser, logout, deleteAccount } = useAuth();
   const { xp } = useProgress();
+  const prevXp = useRef(xp);
+
+  useEffect(() => {
+    if (xp > prevXp.current) {
+      setXpBump(true);
+      const timer = setTimeout(() => setXpBump(false), 500);
+      prevXp.current = xp;
+      return () => clearTimeout(timer);
+    } else {
+      prevXp.current = xp;
+    }
+  }, [xp]);
 
   useEffect(() => {
     const handleStartExam = () => setActiveTab('exam');
@@ -118,7 +131,10 @@ function App() {
                 <div className="flex items-center gap-3">
                   <div className="hidden md:flex flex-col items-end">
                     <span className="text-sm font-bold text-slate-700 leading-none">{currentUser.displayName || 'Bé ngoan'}</span>
-                    <span className="text-[11px] text-amber-500 font-black flex items-center gap-1 mt-0.5"><Zap size={10} className="fill-amber-500" /> {xp || 0} XP</span>
+                    <span className={`text-[11px] font-black flex items-center gap-1 mt-0.5 transition-all duration-300 ${xpBump ? 'text-amber-600 scale-125' : 'text-amber-500'}`}>
+                      <Zap size={10} className={xpBump ? 'fill-amber-600' : 'fill-amber-500'} /> 
+                      {xp || 0} XP
+                    </span>
                   </div>
                   <div className="flex gap-1.5">
                     <button 

@@ -15,6 +15,7 @@ export default function QuizMode() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [roundResults, setRoundResults] = useState([]);
   const [questionCount, setQuestionCount] = useState(10);
+  const [flyingXp, setFlyingXp] = useState([]);
 
   const { updateScore, progress, addXp, xp } = useProgress();
 
@@ -86,6 +87,13 @@ export default function QuizMode() {
     if (isCorrect) {
       setStats(prev => ({ ...prev, correct: prev.correct + 1 }));
       addXp(30); // Cấp XP ngay lập tức để trẻ có feedback tức thì
+      
+      // Kích hoạt hiệu ứng bay XP
+      const id = Date.now();
+      setFlyingXp(prev => [...prev, id]);
+      setTimeout(() => {
+        setFlyingXp(prev => prev.filter(x => x !== id));
+      }, 1000);
     } else {
       setStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
     }
@@ -444,6 +452,17 @@ export default function QuizMode() {
           </div>
         </div>
       </div>
+
+      {/* Render flying XP animations */}
+      {flyingXp.map(id => (
+        <div 
+          key={id} 
+          className="fixed z-[100] pointer-events-none animate-fly-xp flex items-center gap-1 text-amber-500 font-black text-2xl drop-shadow-md"
+        >
+          <Zap className="fill-amber-500" size={24} />
+          +30 XP
+        </div>
+      ))}
     </div>
   );
 }

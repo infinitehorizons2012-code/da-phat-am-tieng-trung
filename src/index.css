@@ -30,3 +30,4 @@
   background-color: var(--color-slate-400);
 }
 .hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+@keyframes flyUpXp { 0% { top: 60%; left: 50%; transform: translate(-50%, -50%) scale(1.5); opacity: 1; } 100% { top: 25px; left: calc(100vw - 40px); transform: translate(-50%, -50%) scale(0.5); opacity: 0; } } .animate-fly-xp { animation: flyUpXp 1s ease-in-out forwards; }
