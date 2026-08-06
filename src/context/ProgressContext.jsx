@@ -166,7 +166,7 @@ export const ProgressProvider = ({ children }) => {
 
   const getGlobalProgressPercentage = () => {
     if (!progress) return 0;
-    const totalItems = 21 + 36 + 4 + 1600 + 20 + 4 + 3; // 1688
+    const totalItems = 21 + 36 + 4 + 1616 + 20 + 4 + 3; // 1704
     let currentScore = 0;
     ['initials', 'finals', 'tones', 'syllables', 'tonePairs', 'spellingRules', 'sandhiRules'].forEach(cat => {
       if (progress[cat]) {

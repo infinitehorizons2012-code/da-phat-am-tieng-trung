@@ -36,7 +36,7 @@ export const pinyinMatrix = {
     'u': 'pu'
   },
   'm': {
-    'a': 'ma', 'o': 'mo', 'e': 'me', 'ai': 'mai', 'ei': 'mei', 'ao': 'mao', 'ou': 'mou', 'an': 'man', 'en': 'men', 'ang': 'mang', 'eng': 'meng',
+    'a': 'ma', 'o': 'mo', 'ai': 'mai', 'ei': 'mei', 'ao': 'mao', 'ou': 'mou', 'an': 'man', 'en': 'men', 'ang': 'mang', 'eng': 'meng',
     'i': 'mi', 'ie': 'mie', 'iao': 'miao', 'iu': 'miu', 'ian': 'mian', 'in': 'min', 'ing': 'ming',
     'u': 'mu'
   },
@@ -46,7 +46,7 @@ export const pinyinMatrix = {
   },
   'd': {
     'a': 'da', 'e': 'de', 'ai': 'dai', 'ei': 'dei', 'ao': 'dao', 'ou': 'dou', 'an': 'dan', 'ang': 'dang', 'eng': 'deng', 'ong': 'dong',
-    'i': 'di', 'ia': 'dia', 'ie': 'die', 'iao': 'diao', 'iu': 'diu', 'ian': 'dian', 'ing': 'ding',
+    'i': 'di', 'ie': 'die', 'iao': 'diao', 'iu': 'diu', 'ian': 'dian', 'ing': 'ding',
     'u': 'du', 'uo': 'duo', 'ui': 'dui', 'uan': 'duan', 'un': 'dun'
   },
   't': {
